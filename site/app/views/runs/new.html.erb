@@ -1,0 +1,22 @@
+DEPRECATED
+<h1>New run</h1>
+
+<%= error_messages_for :run %>
+
+<% form_for(@run) do |f| %>
+  <p>
+  Program: <%= collection_select(:slrun, :learner_id, Program.find(:all,
+                                 :conditions => ['task_type = ? OR task_type = ? OR task_type = ? OR task_type = ?', 
+									'BinaryClassification', 'MulticlassClassification', 
+									'Regression', 'SequenceTagging']).delete_if { |p| p.hasConstructor? }, "id", "name") %>
+  </p>
+  <p>
+  Dataset: <%= collection_select(:slrun, :dataset_id, Dataset.find(:all,
+    :conditions => 'processed = 1'), "id", "name") %>
+  </p>
+  <p>
+    <%= f.submit "Create" %>
+  </p>
+<% end %>
+
+<%= link_to 'Back', runs_path %>

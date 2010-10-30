@@ -1,0 +1,44 @@
+<style type="text/css" media="screen">
+	#loginbox {
+		padding: 4px 10px;
+		margin: 10px 0px 20px 0px;
+		border: 1px dotted gray;
+	}
+</style>
+
+<div class="sidebar_header">Login:</div>
+<div id="loginbox">
+<% form_remote_tag( :url => {:controller => 'users', :action => 'login_new'}, :html =>{ :id => 'login_form'}) do %>
+	<table border="0" cellspacing="8" cellpadding="0">
+		<tr>
+			<td><label>Username:</label></td>
+			<td><%= text_field_tag :username, params[:username], 
+				:value => session[:username], :size => 12 %></td>
+		</tr>
+		<tr>
+			<td><label>Password:</label></td>
+			<td><%= password_field_tag :password, params[:password], :size => 12  %></td>
+		</tr>
+	</table>
+	<span class="buttons">
+	<%= link_to_remote "Login", :url => {
+			:action => "login_new", 
+			:controller => 'users'
+		}, :html => {:class => 'smallbutton'},
+		:with => "Form.serialize('login_form')" %></span>
+<% end %>
+<% if flash[:password_notice] %>
+	<p style="color: red"><%= flash[:password_notice] %></p> 
+<% end -%>
+<p>
+Not registered?
+<%= link_to 'Sign up', :controller => :users, :action => :new %> for a free MLcomp account.<br>
+<span style="font-size:0.7em"><%= link_to_function "Forgot password?", "$('forgot_form').show()" %></span><br>
+<div id="forgot_form" style="display:none">
+	<% form_tag(:action => "forgot", :controller => "users") do %>
+	  Enter the email address associated with your account and we'll send you a link to reset your password: <br>
+	<%= text_field_tag :email %> <%= submit_tag "Go" %>
+	<% end -%>
+</div>
+</p>
+</div>

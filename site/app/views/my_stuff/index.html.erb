@@ -1,0 +1,57 @@
+<% content_for :sidebar do %>
+	<div class="sidebar_header">
+		Actions:
+	</div>
+	<div class="buttons">
+		<%= make_list "ul", [link_to('Upload new program', :controller => 'programs', :action => 'new'),
+			link_to('Upload new dataset', :controller => 'datasets', :action => 'new')] %>
+	</div>
+<% end -%>
+
+<% 
+  @program_tparams = Program.create_tparams(:user => session[:user],
+                                            :taskTypes => sessionTaskTypes,
+                                            :showHelpers => isadmin, :showUnprocessed => true,
+                                            :default_tparams => {:title => "My programs (#{sessionDatasetFormatSimpleStr})"})
+      #:default_tparams => {:title => sessionTaskTypeSimpleStr.capitalize+" programs"})
+
+  @dataset_tparams = Dataset.create_tparams(:user => session[:user],
+                                            :datasetFormats => sessionDatasetFormats, :showUnprocessed => true,
+                                            :default_tparams => {:title => "My datasets (#{sessionDatasetFormatSimpleStr})"})
+      #:default_tparams => {:title => sessionDatasetFormatSimpleStr.capitalize+" datasets"})
+
+  @run_tparams = Run.create_tparams(:user => session[:user],
+                                    :datasetFormats => sessionDatasetFormats, :showHelpers => true,
+                                    :default_tparams => {:title => "My runs (#{sessionDatasetFormatSimpleStr})"})
+      #:default_tparams => {:title => sessionDatasetFormatSimpleStr.capitalize+" runs"})
+%>
+
+This page shows all the programs, datasets, and runs that you have created.
+
+<% vresult = session[:user].vresult %>
+<% if vresult %>
+  <p>You have created <%= vresult.num_runs %> run(s) which have used up a total time of
+  <%= Format.time(vresult.total_spent_time || 0) %>
+  (<%= Format.time(vresult.recent_spent_time || 0) %> in the last 5 hours).
+  </p>
+<% end %>
+
+<p><b>To create a run, first click on a program or dataset.</b></p>
+
+<%= render :partial => 'table/many_table_show', :locals => { :tparams => @program_tparams } %>
+<br>
+
+
+<br><br>
+
+<%= render :partial => 'table/many_table_show', :locals => { :tparams => @dataset_tparams } %>
+<br>
+<div class="buttons">
+</div>
+<div style="clear:both"></div>
+
+<br><br>
+
+
+<%= render :partial => 'table/many_table_show', :locals => { :tparams => @run_tparams } %>
+<br/>

@@ -1,0 +1,7 @@
+<ol>
+	<% questions.each_with_index do |question,ind| %>
+	<li>
+		<%= render :partial => 'faq/question', :object => question %>
+	</li>
+	<% end -%>
+</ol>

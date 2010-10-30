@@ -1,0 +1,90 @@
+<style type="text/css" media="screen">
+	#what_is_mlcomp h1{
+		font-weight:bold;
+		font-size:1.3em;
+/*		line-height: 1.5em;*/
+		font-variant: small-caps !important;
+/*		letter-spacing: 10px;*/
+/*		border-bottom:3px dashed #5B4E42;*/
+	}
+	#what_is_mlcomp {
+		margin:0px 100px 0px 100px;
+		line-height:1.4em;
+		font-size:1.4em;
+		color:#5B4E42;		
+		text-align:center;
+	}
+	div.infobox {
+		width:45%; 
+		font-size:1.3em;
+		line-height: 1.3em; 
+		float:left; 
+		margin-top:30px; 
+		margin-left:30px;
+	}
+	
+	div.infobox h2 {
+		font-size:1.2em;
+		font-weight:bold;
+		color:#5B4E42;
+		margin:3px;
+		margin-left:0px;
+		font-variant: small-caps;
+	}
+<% start_button = nice_button "Enter", :action => 'index' %>	
+
+</style>
+<div id="what_is_mlcomp">
+  MLcomp is a website for objectively comparing machine learning programs on various datasets.
+  <br> <%= start_button %>
+</div>
+
+
+<div id="program_box" class="infobox"  style="display:none">
+	<%= image_tag "program_img2.png", :style => 'float:right; margin-top:-30px' %>
+	<h2>Programs</h2>
+	Want to see how well your algorithm works?  Upload it.
+</div>
+
+<div id="dataset_box" class="infobox" style="display:none">
+	<%= image_tag "dataset_img2.png", :style => 'float:right; margin-top:-20px' %>
+	<h2>Datasets</h2>
+  <b>Download</b>
+  Looking for the best algorithm for your dataset?  Upload it.
+</div>
+	
+
+<div style="clear:both"></div>
+
+
+<div id="runs_box" class="infobox" style="display:none">
+	<%= image_tag "create_run_img.png", :style => 'float:left; margin-top:-20px; margin-right: 20px' %>
+	<h2>Create Runs</h2>
+  Choose any program to run on any dataset.
+  We perform the run for you free of charge. 
+</div>
+
+
+<div id="analyze_box" class="infobox" style="display:none" >
+	<%= image_tag "result_img.png", :style => 'float:left; margin-right: 20px' %>
+	<h2>Compare Results</h2>
+  Browse the performance between runs on programs and datasets.
+  Find the currently best algorithm on any given problem. 
+  Transparency.  Reproducibility.  Collaboration.
+</div>
+
+<div style="clear:both; ">
+	
+</div>
+<br>
+<br>
+<br>
+
+<% javascript_tag do %>
+	<%= render :update do |page|
+		%w(program dataset runs analyze).each do |boxname|
+			page.visual_effect :appear, "#{boxname}_box", :duration => 0.5, :queue => 'end'
+		end
+	end %>
+<% end -%>
+

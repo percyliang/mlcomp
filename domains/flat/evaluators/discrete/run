@@ -1,0 +1,30 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+# Given a datashard (with true labels) and a predictions file, compute the error.
+# TODO: handle prediction files with confidences to compute AUC
+# TODO: compute confusion matrix
+# Output results to a YAML file
+cmd = ARGV.shift
+case cmd
+  when 'evaluate' then
+    truePath, predPath = parseArgs(:file, :file)
+    trueLines = IO.readlinesClean(truePath)
+    predLines = IO.readlinesClean(predPath)
+    if trueLines.size != predLines.size
+      exitFail("True file has #{trueLines.size} examples but prediction file has #{predLines.size} examples")
+    else
+      numExamples = trueLines.size
+      numErrors = 0
+      (0...numExamples).each { |i|
+        truey = trueLines[i].split(/ /, 2)[0].to_i
+        predy = predLines[i].split(/ /, 2)[0].to_i
+        numErrors += 1 if truey != predy
+      }
+      writeStatus(
+        'numErrors' => numErrors,
+        'numExamples' => numExamples,
+        'errorRate' => 1.0*numErrors/numExamples)
+    end
+end

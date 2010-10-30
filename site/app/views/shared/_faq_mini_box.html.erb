@@ -1,0 +1,11 @@
+<% view_name = controller.controller_name + "/" + controller.action_name %>
+<% questions = @questions.select{|q| q['tags'].index(view_name)} %>
+<% unless questions.empty? %>
+<div class="sidebar_header">Frequently Asked Questions</div>
+<div style="font-size:0.8em">
+	<%= render :partial => 'faq/question_list', :locals => {
+		:questions => questions
+	} %>
+  <!--<%= link_to "Full FAQ", '/faq' %>-->
+</div>
+<% end -%>

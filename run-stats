@@ -1,0 +1,2 @@
+#./loop $((5*60*60)) script/mlcomp/resource periodicUpdate "$@"
+./loop $((5*60*60)) site/script/mlcomp/resource rateAll "$@"

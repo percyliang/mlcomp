@@ -1,0 +1,46 @@
+
+<h4>Comments:</h4>
+
+<ul id="comment_list">
+	<% object.comments.reverse.each do |comment| %>
+	<li id="comment_<%= comment.id %>">
+		<%= render :partial => 'shared/comment', :locals => {:comment => comment} %>
+	</li>
+	<%- end %>
+</ul>
+
+
+
+<label>Post comment:</label><br>
+<div class="leave_comment_box">
+	<% if loggedin? %>
+		<% form_tag( {:action => "add_comment", 
+				:controller => 'general_display'},
+				:id => "add_comment_form") do %>
+
+			<%= hidden_field_tag "comment[commentable]", object.type %>
+			<%= hidden_field_tag "comment[commentable_id]", object.id %>
+	
+			<label>Title: </label> <br>
+			<%= text_field_tag 'comment[title]', nil, :size => 50 %> <br>
+			<label>Comment: </label><br>
+			<%= text_area_tag 'comment[comment]', "", :rows => 5, :cols => 57 %><br>
+
+				<span class="buttons">
+				<%= link_to_remote "Submit", :url => {
+						:action => "add_comment", 
+						:controller => 'general_display'
+					},
+					:before => update_page { |pg| 
+						pg[:add_comment_status].replace_html "Posting..."
+						pg[:add_comment_status].appear
+					}, :with => "Form.serialize('add_comment_form')" %></span><span id="add_comment_status" style="display:none">empty</span> 
+		<% end %>
+				
+	<% else %>
+		<p>
+			Must be logged in to post comments.
+		</p>
+	<% end -%>
+
+</div>

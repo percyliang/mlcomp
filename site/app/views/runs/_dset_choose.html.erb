@@ -1,0 +1,25 @@
+<% default_tparams = {
+:columns => [:dset_add_to_list, :dset_name_nolink, :dset_user_nolink],
+:name => "datasets",
+:model => 'Dataset', 
+:limit => 10,
+:width => '100%',
+:show_footer => true,
+:paginate => true,
+:pagination_page => 0, 
+:include => 'user',
+} %>
+<% all_tparams = [
+	['(all compat.)', {
+		:filters => [['format', @dset_format]]
+		}
+	],
+	[
+		'(mine)', 
+		{:filters => [['format', @dset_format],
+			['user_id', session[:user].id]]
+		}
+]].map do |name,hash|
+	[name, default_tparams.merge(hash)]
+end %>
+<%= render :partial => 'table/many_table_show', :locals => { :tparams => all_tparams } %>

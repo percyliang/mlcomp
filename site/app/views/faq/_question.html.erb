@@ -1,0 +1,8 @@
+<% liid = rand 1000000 %>
+<div class="faq_question">
+	<%= link_to_function(question['question'], 
+		"new Effect.toggle('#{liid}','blind', {duration:0.1})") %>
+</div>
+<div id="<%= liid %>" class="faq_answer" style="display:none">
+	<%= question['answer'] %>
+</div>

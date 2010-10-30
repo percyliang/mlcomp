@@ -1,0 +1,4 @@
+<% @table_params = default_table_params %>
+<% @table_params.merge!({:name => 'mytable', :paginate => true, :pagination_page => 0, :limit => 10}) %>
+
+<%= render :partial => 'table_container', :locals => {:table_params => @table_params} %>

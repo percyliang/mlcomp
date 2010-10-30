@@ -1,0 +1,20 @@
+#!/usr/bin/ruby
+
+require 'svmlight-format'
+
+class MulticlassFormat < SVMLightFormat
+  def isValidLabel(y)
+    y = y.to_i_or_nil
+    y && y >= 1
+  end
+
+  def updateLabelSummary(summary, y)
+    y = y.to_i_or_nil
+    summary = {'numLabels' => 0} if not summary
+    summary['numLabels'] = [summary['numLabels'], y].max
+    summary
+  end
+
+  def blankLabel; 1 end # 0 crashes SVMlight; must be valid
+end
+MulticlassFormat.new.main

@@ -1,0 +1,134 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+# This is multiclass classification, where each example occupies one file.
+# It could be a text document or an image.  In either case, it's treated as a black box.
+# So this program can be used for both DocumentClassification and ObjectRecognition.
+
+# Each datashard is a directory which contains a directory for each label, which has a file.
+# raw/
+#   label1/example1
+#   label1/example2
+#   label2/example3
+#   label2/example4
+#   ...
+# stripped:
+#   unlabeled/example1
+#   unlabeled/example2
+#   ...
+# Predictions file:
+#   label1/example1
+#   label7/example2
+#   ...
+TRAIN_SPLIT_FRAC = 0.7
+
+class DatasetSplit
+  def initialize(numExamples, trainSplitFrac)
+    # Two ways to split
+    #   - Order-independent (this is what we do now)
+    #   - First portion is train, second portion is test
+    #     (has advantage of being more realistic)
+    permutation = (0...numExamples).to_a.shuffle(42)
+    @isTrain = [false] * numExamples
+    numTrainExamples = (numExamples * trainSplitFrac + 0.5).to_i
+    (0...numTrainExamples).each { |i| @isTrain[permutation[i]] = true }
+  end
+
+  def isTrain(i); @isTrain[i] end
+end
+
+def entries(path); Dir.entries(path).delete_if { |x| x == '.' || x == '..' } end
+
+def readExamples(path)
+  examples = {}
+  labels = entries(path)
+  labels.each { |y|
+    entries("#{path}/#{y}").each { |x|
+      exitFail("File '#{x}' occurs in both label #{examples[x]} and #{y} - not allowed.") if examples[x]
+      examples[x] = y
+    }
+  }
+  examples
+end
+
+def inspect(path)
+  exitFail("File doesn't exist: '#{path}'") if not File.exists?(path)
+  labels = entries(path)
+  examples = readExamples(path)
+  writeStatus({'numExamples' => examples.size,
+               'numLabels' => labels.size})
+  exitSuccess
+end
+
+def split(inPath, trainPath, testPath)
+  systemOrFail('mkdir', trainPath)
+  systemOrFail('mkdir', testPath)
+
+  numExamples = 0
+  labels = entries(inPath)
+  labels.each { |y|
+    numExamples += entries("#{inPath}/#{y}").size
+    systemOrFail('mkdir', "#{trainPath}/#{y}")
+    systemOrFail('mkdir', "#{testPath}/#{y}")
+  }
+
+  # Split the data
+  split = DatasetSplit.new(numExamples, TRAIN_SPLIT_FRAC)
+  puts "Using #{TRAIN_SPLIT_FRAC} of #{numExamples} for training"
+  i = 0
+  labels.each { |y|
+    puts "Processing examples of label #{y}..." 
+    entries("#{inPath}/#{y}").each { |x|
+      systemOrFail('cp', "#{inPath}/#{y}/#{x}", (split.isTrain(i) ? trainPath : testPath)+"/"+y)
+      i += 1
+    }
+  }
+end
+
+def stripLabels(inPath, outPath)
+  systemOrFail('mkdir', outPath)
+  systemOrFail('mkdir', "#{outPath}/unlabeled")
+  labels = entries(inPath)
+  numExamples = 0
+  labels.each { |y|
+    puts "Processing examples of label #{y}..." 
+    entries("#{inPath}/#{y}").each { |x|
+      systemOrFail('ln', '-s', file("#{inPath}/#{y}/#{x}").relativize("#{outPath}/unlabeled"), "#{outPath}/unlabeled/#{x}")
+    }
+  }
+end
+
+def evaluate(truePath, predPath)
+  trueExamples = readExamples(truePath)
+  predExamples = readExamples(predPath)
+  numErrors = 0
+  if trueExamples.size != predExamples.size
+    exitFail("Wrong number of examples output: true (#{truePath}) has #{trueExamples.size}, pred (#{predPath}) has #{predExamples.size}")
+  end
+  trueExamples.each { |x,y|
+    exitFail("Missing prediction for #{x}") unless predExamples[x]
+    numErrors += 1 if predExamples[x] != y
+  }
+  numExamples = trueExamples.size
+  writeStatus(
+    'numErrors' => numErrors,
+    'numExamples' => numExamples,
+    'errorRate' => 1.0*numErrors/numExamples)
+end
+
+cmd = ARGV.shift
+case cmd
+  when 'inspect'
+    path, = parseArgs(:directory)
+    inspect(path)
+  when 'split'
+    rawPath, trainPath, testPath = parseArgs(:directory, :nonexist, :nonexist)
+    split(rawPath, trainPath, testPath)
+  when 'stripLabels'
+    inPath, outPath = parseArgs(:directory, :nonexist)
+    stripLabels(inPath, outPath)
+  when 'evaluate' then
+    truePath, predPath = parseArgs(:directory, :directory)
+    evaluate(truePath, predPath)
+end

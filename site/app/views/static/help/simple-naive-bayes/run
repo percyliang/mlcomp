@@ -1,0 +1,109 @@
+#!/usr/bin/ruby
+
+# This is a very simple Naive Bayes implementation.
+# Converts all features binary features: 1 if >0 and 0 if <=0 or absent.
+# Supports simple Laplace smoothing.
+# Note: class prior p(y) is simulated with a bias feature that's always 1.
+#
+# Percy Liang
+# 08/19/09
+
+# Takes one line of an SVMlight data file, and returns an (x,y) pair
+# Converts "2 3:5 8:-1" => [{3=>5,8=>-1}, 2]
+def parseExample(line)
+  y, *xstr = line.split
+  x = {}
+  xstr.each { |s| x[$1] = 1 if s =~ /^(.+):(.+)$/ && $2.to_f > 0 }
+  x['_BIAS_'] = 1 # To simulate the class prior
+  [x, y]
+end
+
+# Serialize and deserialize a Naive Bayes model
+def loadModel(path)
+  logProbs = {}
+  ys = {}
+  IO.foreach(path) { |line|
+    f, y, logProb = line.split
+    logProbs[[f,y]] = logProb.to_f
+    ys[y] = true
+  }
+  [ys, logProbs]
+end
+def saveModel(model, path)
+  ys, logProbs = model
+  out = open(path, "w")
+  logProbs.each { |(f,y),logProb|
+    out.puts "#{f} #{y} #{logProb}"
+  }
+  out.close
+end
+
+# Return y that has the highest posterior probability given x
+def predict(model, x)
+  ys, logProbs = model
+  # Choose the label that yields the highest probability
+  ys.keys.map { |y|
+    # For features that we haven't seen before, use the uniform probability
+    score = x.keys.map { |f| logProbs[[f,y]] || 0 }.reduce(:+) # Compute log probability
+    [score, y]
+  }.max[1] # Choose y that yields the highest score
+end
+
+cmd = ARGV.shift or raise "Missing command: learn | predict"
+case cmd
+  when 'setHyperparameter'
+    hyperparameter = ARGV.shift
+    puts "Saving hyperparameter #{hyperparameter}"
+    system "echo '#{hyperparameter}' > hyperparameter" # Save the hyperparameter, which is the smoothing parameter
+
+  when 'learn' then
+    inPath = ARGV.shift or raise "Missing argument (input file)"
+    hyperparameter = File.exists?('hyperparameter') ? IO.readlines('hyperparameter')[0].to_f : 1e-100 # Read smoothing parameter
+
+    # Map [f,y] to counts of number of times feature f occurs with label y
+    counts = {}
+    fs = {} # Keep track of which features were seen
+    ys = {} # Keep track of which labels were seen
+    
+    # Read in training examples and compute counts
+    puts "Processing training examples..."
+    IO.foreach(inPath) { |line|
+      x, y = parseExample(line)
+      ys[y] = true
+      x.keys.each { |f|
+        fs[f] = true
+        counts[[f,y]] = (counts[[f,y]] || 0) + 1
+      }
+    }
+    
+    # Smooth, normalize, and take logs
+    puts "Smoothing and normalizing..."
+    fs.keys.each { |f|
+      sum = 0
+      ys.keys.each { |y|
+        counts[[f,y]] = count = (counts[[f,y]] || 0) + hyperparameter # Smooth
+        sum += count
+      }
+      ys.keys.each { |y|
+        counts[[f,y]] = Math.log(1.0 * counts[[f,y]] / sum) # Normalize and take log
+      }
+    }
+
+    puts "Saving model..."
+    saveModel([ys, counts], 'model')
+
+  when 'predict' then
+    inPath = ARGV.shift or raise "Missing argument (input file)"
+    outPath = ARGV.shift or raise "Missing argument (output file)"
+
+    puts "Loading model..."
+    model = loadModel('model')
+
+    puts "Predicting test examples..."
+    out = open(outPath, "w") # Output predictions to this file
+    IO.foreach(inPath) { |line| # For each test example...
+      x, ignore_y = parseExample(line)
+      out.puts predict(model, x)
+    }
+    out.close
+end

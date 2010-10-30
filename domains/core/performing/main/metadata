@@ -1,0 +1,4 @@
+name: performing
+description: Main entry for performing tasks (unsupervised learning, solving optimization problems), where is one phase.
+task: Main
+construct: performer:Program dataset:Dataset stripper:Program[Strip] evaluator:Program[Evaluate]

@@ -1,0 +1,30 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+# Given a datashard (with true labels) and a predictions file, compute the error.
+# Labels are continuous, so compute mean squared error
+# Output results to a YAML file
+cmd = ARGV.shift
+case cmd
+  when 'evaluate' then
+    truePath, predPath = parseArgs(:file, :file)
+    trueLines = IO.readlinesClean(truePath)
+    predLines = IO.readlinesClean(predPath)
+    results = []
+    if trueLines.size != predLines.size
+      exitFail("True file has #{trueLines.size} examples but prediction file has #{predLines.size} examples")
+    else
+      numExamples = trueLines.size
+      totalMeanSquaredError = 0
+      (0...numExamples).each { |i|
+        truey = trueLines[i].split(/ /, 2)[0].to_f
+        predy = predLines[i].split(/ /, 2)[0].to_f
+        totalMeanSquaredError += (truey-predy)**2
+      }
+      writeStatus(
+        'totalMeanSquaredError' => totalMeanSquaredError,
+        'numExamples' => numExamples,
+        'meanSquaredError' => 1.0*totalMeanSquaredError/numExamples)
+    end
+end

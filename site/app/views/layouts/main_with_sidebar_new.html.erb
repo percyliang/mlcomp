@@ -1,0 +1,19 @@
+<% inside_layout 'base_layout_new' do %>
+
+<div id="content">
+	<%= yield %>
+</div>
+
+<div id="sidebar-wrapper">
+
+	<div id="sidebar">
+		<%= render :partial => 'general_display/dataset_format_selector' if @show_format_selector %>
+		<%= yield :sidebar %>
+		<%= render(:partial => 'shared/default_sidebar') %>
+	</div>
+
+</div>
+
+
+
+<% end %>

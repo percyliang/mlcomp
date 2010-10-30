@@ -1,0 +1,67 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+# Implements the multiclass classification task given a
+# program that implements the binary class classification task.
+cmd = ARGV.shift
+case cmd
+  when 'construct' then
+    saveArgs
+  when 'learn' then
+    # For each label y, create a separate prediction task
+    # where y is positive and not y is negative
+    binaryLearner, = loadArgs(:program)
+    datashard, = parseArgs(:file)
+
+    points = IO.readlinesClean(datashard).map { |line|
+      y, x = line.split(/ /, 2)
+      y = y.to_i
+      [x,y]
+    }
+    maxy = points.map { |x,y| y }.max
+    IO.writelines('maxy', [maxy])
+
+    (1..maxy).each { |they|
+      puts "===== One versus all: training label y=#{they} versus the rest ====="
+
+      # Create data
+      myDatashard = "data#{they}"
+      IO.writelines(myDatashard,
+        points.map { |x,y| (they == y ? 1 : -1).to_s + (x ? " " + x : "") })
+
+      # Create copy of learner (because each learner has its own mutable state)
+      myBinaryLearner = "_one-vs-all-learner#{they}"
+      copyProgram(binaryLearner, myBinaryLearner)
+
+      exitIfFail("learn#{they}",
+        runProgram(myBinaryLearner, 'learn', file(myDatashard)))
+      puts
+    }
+
+  when 'predict' then
+    inPath, outPath = parseArgs(:file, :nonexist)
+    maxy = IO.readlines('maxy')[0].to_i
+     
+    # Use each binary classifier to make a prediction on all data points
+    predictions = []
+    (1..maxy).each { |they|
+      myBinaryLearner = "_one-vs-all-learner#{they}"
+      myOutPath = "#{outPath}-y#{they}"
+
+      exitIfFail("predict#{they}",
+        runProgram(myBinaryLearner, 'predict', file(inPath), file(myOutPath)))
+      # Use confidences if they exist
+      myOutPath = myOutPath+'.confidences' if File.exists?(myOutPath+'.confidences')
+      predictions[they] = IO.readlines(myOutPath).map { |v| v.to_i }
+    }
+
+    # For each example, choose best prediction
+    numExamples = predictions[1].size
+    puts "#{numExamples} examples"
+    IO.writelines(outPath,
+      (0...numExamples).map { |i|
+        l = (1..maxy).map { |y| predictions[y][i] }
+        l.index(l.max) + 1
+      })
+end

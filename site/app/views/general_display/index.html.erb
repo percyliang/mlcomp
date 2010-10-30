@@ -1,0 +1,60 @@
+<div id="home_info">
+  MLcomp is a free website for <b>objectively comparing</b> machine learning programs across various datasets for multiple problem <a href="/faq/domains">domains</a>.
+
+  <table cellspacing="20">
+    <tr>
+      <td><%= programIcon %></td>
+      <td>
+        <div class="homePoint">Do a comprehensive evaluation of your new algorithm.</div>
+        <div class="homeSubpoint"><a href="/programs/new">Upload your program</a> and run it on <%= link_to 'existing datasets', datasets_path %>.  Compare the results with those obtained by other programs.</div>
+      </td>
+    </tr>
+    <tr>
+      <td><%= datasetIcon %></td>
+      <td>
+        <div class="homePoint">Find the best algorithm (program) for your dataset.</div>
+        <div class="homeSubpoint"><a href="/datasets/new">Upload your dataset</a> and run <%= link_to 'existing programs', programs_path %> on it to see which one works best.</div>
+      </td>
+    </tr>
+    <tr>
+      <td><%= helpIcon %></td>
+      <td>
+        <div class="homePoint">How do I learn more?</div>
+        <div class="homeSubpoint">
+          Read the <a href="/faq">help page</a> or follow the <a href="/help/quickstart.html">QuickStart</a>.
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <%= link_to 'Sign up', :controller => 'users', :action => 'new' %> for a free account!<p>
+  
+  <span class=newHighlight>NEW</span>: A preliminary rating system for programs and datasets, support for datasets up to 200MB (zipped), and automatic creation of runs on your programs/datasets (read more on the <a href="http://groups.google.com/group/mlcomp">discussion forum</a>).<br>
+  <span class=newHighlight>NEW</span>: We just created a <a href="http://groups.google.com/group/mlcomp">discussion forum</a>.<br>
+  <span class=newHighlight>NEW</span>: We are actively improving MLcomp.  Please help us prioritize by
+  <a href="http://spreadsheets0.google.com/viewform?authkey=CN_n4ZkN&formkey=dG9nSGMwRGV4NHNIWWpWbzRGWjNNZ2c6MQ#gid=0" target="_blank">selecting the features most important to you</a>.
+</div>
+
+<br>
+
+<div style="clear:both">
+	
+</div>
+
+<hr>
+<h4>MLcomp snapshot</h4>
+<br>
+
+<div class="panel">
+  <%= render :partial => 'table/many_table_show', :locals => { :tparams => @program_tparams } %>
+  <br/>
+  <%= render :partial => 'table/many_table_show', :locals => { :tparams => @dataset_tparams } %>
+  <br/>
+  <%= render :partial => 'table/many_table_show', :locals => { :tparams => @run_tparams } %>
+</div>
+
+<% content_for :sidebar do %>
+<%= render :partial => 'general_display/dataset_format_selector' %>
+<br>
+<%= render :partial => 'shared/twitter_news' %>
+<% end %>

@@ -1,0 +1,7 @@
+<% if not loggedin? %>
+  <%= render :partial => 'general_display/login' %>
+<% end %>
+
+<%= render :partial => 'general_display/comment_form' %>
+
+<%= render :partial => 'shared/faq_mini_box' %>

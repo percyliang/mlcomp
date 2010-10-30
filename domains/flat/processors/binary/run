@@ -1,0 +1,15 @@
+#!/usr/bin/ruby
+
+require 'svmlight-format'
+
+class BinaryFormat < SVMLightFormat
+  def isValidLabel(y)
+    y = y.to_i_or_nil
+    y && (y == -1 || y == +1)
+  end
+
+  def updateLabelSummary(summary, y)
+    {'numLabels' => 2}
+  end
+end
+BinaryFormat.new.main

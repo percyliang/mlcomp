@@ -1,0 +1,65 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+# Tunes the hyperparameter (e.g., 0.01, 0.1, 1, 10, 100).
+# Split off part of the training data as validation.  Use that the choose the best hyperparameter.
+cmd = ARGV.shift
+case cmd
+  when 'construct' then
+    saveArgs
+
+  when 'learn' then
+    numProbes, learner, splitter, evaluator = loadArgs(:integer, :program, :program, :program)
+    exitFail("Invalid number of probes: #{numProbes}") if numProbes < 2 || numProbes > 100
+    datashard, = parseArgs(:file)
+
+    # Hold out some of the data for testing
+    cvTrain = 'cv.train'
+    cvTest = 'cv.test'
+    exitIfFail("split", runProgram(splitter, 'split', file(datashard), file(cvTrain), file(cvTest)))
+
+    bestErrorRate = nil
+    bestHyperparameter = nil
+    bestLearner = nil
+
+    # Try hyperparameters
+    (0...numProbes).each { |probe| # For each setting of the hyperparameter...
+      hyperparameter = 10.0**(probe-numProbes/2)
+      puts "===== Cross-validator: trying hyperparameter #{hyperparameter} ====="
+
+      # Create copy of learner (because each learner has its own state)
+      myLearner = "_tune-hyperparameter#{probe}"
+      copyProgram(learner, myLearner)
+
+      # Learn, predict, evaluate
+      exitIfFail("setHyperparameter#{probe}", runProgram(myLearner, 'setHyperparameter', hyperparameter))
+      exitIfFail("learn#{probe}", runProgram(myLearner, 'learn', file(cvTrain)))
+      # Lazy: we don't strip labels
+      cvTestPredictions = File.expand_path("cvTestPredictions#{probe}")
+      exitIfFail("predict#{probe}", runProgram(myLearner, 'predict', file(cvTest), file(cvTestPredictions)))
+      exitIfFail("evaluate#{probe}", runProgram(evaluator, 'evaluate', file(cvTest), file(cvTestPredictions)))
+      
+      # Look at the error rate and update the best
+      errorRate = readStatus(evaluator)['errorRate'] || readStatus(evaluator)['meanSquaredError']
+      exitFail("With hyperparameter #{hyperparameter}, evaluation didn't produce errorRate or meanSquaredError") unless errorRate
+      errorRate = errorRate.to_f
+      puts "CV error rate #{errorRate} with hyperparameter #{hyperparameter}"
+      if bestErrorRate == nil || errorRate < bestErrorRate then
+        bestErrorRate = errorRate
+        bestHyperparameter = hyperparameter
+        bestLearner = myLearner
+      end
+      puts
+    }
+
+    # Save the best
+    puts "Best hyperparameter value is #{bestHyperparameter}; got CV error rate #{bestErrorRate}"
+    updateStatus('bestHyperparameter', bestHyperparameter)
+    updateStatus('bestCVErrorRate', bestErrorRate)
+    systemOrFail('ln', '-s', bestLearner, '_tune-hyperparameter-best')
+
+  when 'predict' then
+    inPath, outPath = parseArgs(:file, :nonexist)
+    exitIfFail("predict", runProgram("_tune-hyperparameter-best", 'predict', file(inPath), file(outPath)))
+end

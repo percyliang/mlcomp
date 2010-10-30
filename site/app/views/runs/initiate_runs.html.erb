@@ -1,0 +1,81 @@
+<% dset_input_id = "datasets_to_run_input" %>
+<% prg_input_id = "programs_to_run_input" %>
+<% controller_name = controller.controller_name %>
+<% single_item_name = controller.controller_name.singularize %>
+<% list_of_items_name = "dataset" %>
+<% list_of_items_name = "program" if single_item_name == "dataset" %>
+
+<h2>Create Runs for <%= single_item_name.capitalize + " " + @item.name %></h2>
+
+<div style="float:left; width:300px">
+	<%= render :partial => 'general_display/sorted_table_display', 
+		:locals => {
+			:controller_name => controller_name,
+			:action_name => 'add_runs_table_query',
+			:numitems => 10,
+			:id_name => @item.id
+		} %>
+</div>
+
+
+
+<div id="items_to_run_box" style="float:left; width:300px; margin-left:15px; border: 1px solid #ffc470">
+	<div style="padding-left:20px;">
+	<h3 style="margin-top:0px">Desired List of <%= list_of_items_name.capitalize.pluralize %> to Run:</h3>	
+	<% form_tag ({:action => 'create_several_runs', :controller => 'runs'}, :id => 'create_runs_form') do %>
+		<ol id = "items_to_run">
+		</ol>
+		<input type="hidden" id="programs_to_run_input" name="programs_json" value="">
+		<input type="hidden" id="datasets_to_run_input" name="datasets_json" value="">
+		<a href="javascript: write_list_to_form(); $('create_runs_form').submit();">Submit Runs...</a>
+	<% end %>
+	</div>
+</div>
+
+
+	
+<script type="text/javascript">
+
+var list_name = 'items_to_run';
+var input_list_tag_id = '<%= list_of_items_name %>s_to_run_input';
+var fixed_item_tag_id = '<%= single_item_name %>s_to_run_input';
+
+function add_to_list (name, id) {
+	if (get_list_elts().indexOf(id) == -1) {
+		
+		// Build list items
+		var li_item = new Element('li', { id: 'item_' + id, item_id: id }); 
+		var remlink = new Element('a', {href:'#'});
+		remlink.appendChild(document.createTextNode("rem"));
+		remlink.observe('click', function () {
+			rm_from_list(id);
+		});
+		li_item.appendChild(document.createTextNode(name + "  "));
+		li_item.appendChild(remlink);
+		
+		// Add list items 
+		$(list_name).insert({bottom: li_item});
+	} else {
+		alert("Already added " + name + " to list!");
+	}
+};
+
+function get_list_elts() {
+	var elements = $$('#' + list_name + ' li').map(
+		function (elt) { 
+			return elt.readAttribute('item_id');
+		}
+	);
+	return elements;
+}
+
+function rm_from_list (id) {
+	$('item_' + id).remove();
+};
+
+function write_list_to_form() {
+	$(input_list_tag_id).writeAttribute('value', get_list_elts().toJSON());
+	$(fixed_item_tag_id).writeAttribute('value', [<%= @item.id %>].toJSON());
+};
+
+</script>

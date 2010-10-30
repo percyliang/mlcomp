@@ -1,0 +1,6 @@
+# Updates the mysql database.
+# Run this script each time you check out from the repository.
+echo "Doing rails migration..."
+(cd site && rake db:migrate) || exit 1
+echo "Creating DB views..."
+cat create-views.sql | grep -v "^--" | mysql -u rails_user mlcomp_development

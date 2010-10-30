@@ -1,0 +1,75 @@
+name: CollaborativeFiltering
+kind: supervised-learning
+taskDescription: |-
+  Given some entries of a matrix (e.g., where rows are users and columns are movies and each entry is a numeric rating),
+  predict other entries.
+datasetDescription: |-
+  One file where each line corresponds to an entry of the matrix:
+  <pre>
+  <em>row-index</em> <em>column-index</em> <em>value</em>
+  </pre>
+  where <em>row index</em> and <em>column index</em> are positive integers
+  and <em>value</em> is a real number.
+  For the test file, <em>value</em> is 0.
+  The predictions file contains a line for each test example:
+  <pre>
+  <em>predicted-value</em>
+  </pre>
+sampleDataset: collaborativefiltering-sample
+utilsProgram: collaborativefiltering-utils
+evaluatorProgram: collaborativefiltering-utils
+datasetFields:
+  - name: "#train"
+    type: integer
+    value: train/numExamples
+    description: Number of training examples.
+  - name: "#test"
+    type: integer
+    value: test/numExamples
+    description: Number of test examples.
+  - name: "#rows"
+    type: integer
+    value: train/numRows
+    description: Maximum row index seen in training.
+  - name: "#cols"
+    type: integer
+    value: train/numCols
+    description: Maximum column index seen in training.
+  - name: minY
+    type: double
+    value: train/minLabelValue
+    description: Minimum value of output Y seen on training data.
+  - name: maxY
+    type: double
+    value: train/maxLabelValue
+    description: Maximum value of output Y seen on training data.
+runFields:
+  - name: Learn time
+    type: time
+    value: learn/time
+    description: Time to learn the model on training data.
+  - name: Train RMSE
+    type: double
+    value: doTrain/evaluate/rootMeanSquaredError
+    description: Root mean squared error.
+  - name: Train MAE
+    type: double
+    value: doTrain/evaluate/meanAbsoluteError
+    description: Mean absolute error.
+  - name: Predict train time
+    type: time
+    value: doTrain/predict/time
+    description: Time took to predict on the training set.
+  - name: Test RMSE
+    type: double
+    value: doTest/evaluate/rootMeanSquaredError
+    description: Root mean squared error.
+  - name: Test MAE
+    type: double
+    value: doTest/evaluate/meanAbsoluteError
+    description: Mean absolute error.
+  - name: Predict test time
+    type: time
+    value: doTest/predict/time
+    description: Time to predict on the test set.
+errorFieldValue: doTest/evaluate/rootMeanSquaredError

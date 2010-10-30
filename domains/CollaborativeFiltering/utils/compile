@@ -1,0 +1,1 @@
+scalac Utils.scala && jar cf collaborativefiltering.jar collaborativefiltering && rm -r collaborativefiltering

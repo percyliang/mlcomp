@@ -1,0 +1,34 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+# Splits the raw datashard if training and testing splits don't exist.
+
+cmd = ARGV.shift
+case cmd
+  when 'construct'
+    saveArgs
+  when 'execute'
+    dataset, inspector, splitter = loadArgs(:directory, :directory, :directory)
+    rawDatashard = "#{dataset}/raw"
+    trainDatashard = "#{dataset}/train"
+    testDatashard = "#{dataset}/test"
+
+    # Split
+    if not (File.exists?(trainDatashard) && File.exists?(testDatashard))
+      if not File.exists?(rawDatashard)
+        exitFail("Can't find files 'raw' or 'train' and 'test' in your dataset (#{dataset}).")
+      else
+        puts "Found #{rawDatashard}, splitting..."
+        exitIfFail('splitter',
+          runProgram(splitter, 'split', file(rawDatashard), file(trainDatashard), file(testDatashard)),
+          "Splitter failed")
+      end
+    end
+
+    # Inspect
+    exitIfFail('train', runProgram(inspector, 'inspect', file(trainDatashard)), 'Inspecting train datashard failed.')
+    exitIfFail('test', runProgram(inspector, 'inspect', file(testDatashard)), 'Inspecting test datashard failed.')
+
+    exitSuccess
+end

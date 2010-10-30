@@ -1,0 +1,138 @@
+
+<style type="text/css" media="screen">
+	#left_side {
+		float: left;
+		width: 66%;
+	}
+	
+	#right_side {
+		float:right;
+		width:30%;
+	}
+	
+	#creation_result {
+	}
+	#run_structure {
+		font-family: Verdana;
+		text-decoration: none;
+		word-spacing: normal;
+		text-align: left;
+		letter-spacing: 0;
+		line-height: 1.2em;
+		font-size: 0.9em;
+		height:260px;
+		overflow:auto;
+		border: 1px dotted gray;
+		padding:3px;
+	}
+	
+	.run_info_box {
+		font-size:1.2em;
+	}
+	
+	.run_info_box label {
+		font-weight: bold;
+		margin-right:10px;
+	}
+</style>
+
+<% if loggedin? %>
+
+<% form_remote_tag(:url => {:action => 'create_popup'}, 
+:html => {:id => 'submit_run_form'}, 
+:before => "$('submit_run_form')['run_submit_button'].disable();"
+) do %>
+<%= hidden_field_tag('run[dataset_id]', @dataset.id) %>
+<%= hidden_field_tag('run[program_id]', @program.id) %>
+
+<div id="left_side">
+	<div class="run_info_box">
+		<table>
+      <tr><td><b>Program:</b></td><td><%= program_link @program %></td></tr>
+      <tr><td><b>Dataset:</b></td><td><%= dataset_link @dataset %></td></tr>
+		</table>
+    <br>
+
+		<label>Tune hyperparameters:</label> <%= check_box_tag 'run[tune]' %><br>
+    <div style="font-size:0.8em;margin-left:1em">
+      Check this box only if <tt>setHyperparameter</tt> is supported by the program.
+    </div>
+    <br>
+
+    <label>Time limit (hours):</label>
+    <%= text_field_tag('run[allowedTime]', '5', {:size => 1, :id => 'time_limit_input'})%>
+    <%= link_to_function "-", "changeVal(-0.5)" %>
+    <%= link_to_function "+", "changeVal(0.5)" %><br>
+    <div style="font-size:0.8em;margin-left:1em">
+      The program will be terminated after this amount of time.
+      Put no more than you expect this run to take.
+    </div>
+		<div id="limit_warning" style="color:red; display:none">
+			Time limit must not exceed 72 hours.
+		</div>
+
+    <% runs = Run.existingRuns(@program, @dataset) %>
+    <% if runs.size > 0 %>
+      <br>
+      <span style='color:red'><b>Note</b></span>:
+      The following run(s) have already been performed on this program/dataset:
+      <ul>
+      <% runs.each { |run| %>
+        <li><%= run_link run %> (<%= runStatus(run) %>): created by <%= user_link run.user %> <%= timeSince(run.created_at, {}) %></li>
+      <% } %>
+      </ul>
+      Please make sure you're not creating redundant runs.
+    <% end %>
+	</div>
+</div>
+
+<div id="right_side" class="run_info_box">
+	<!-- <%= link_to_function "Test reload", "window.opener.updateTable('runs')" %> -->
+	<%= error_messages_for :run %>
+
+	
+	<%= submit_tag "Create Run!", :id => 'run_submit_button' %>	
+	<div id="creation_result" ></div>
+    	
+</div>
+<% end %>
+
+<%= observe_field 'time_limit_input',
+ 	:frequency => 1,
+	:function => "monitorVal()"%>
+
+<script type="text/javascript" charset="utf-8">
+	
+	var countdown = 4;
+
+	function countDownClose() {
+		new PeriodicalExecuter(function(pe) {
+			if (countdown <= 0) {
+				window.close();
+			} else {
+				$('time_to_close').update(countdown);
+				countdown = countdown - 1;
+			}
+		}, 1);
+	}
+	
+	function monitorVal() {
+		var cur = parseFloat($('time_limit_input').getValue());
+		if (cur > 72) {
+			$('time_limit_input').value = 72;
+			$('limit_warning').show();
+			$('limit_warning').fade({duration:3});
+		}
+	}
+
+	function changeVal(amount) {
+		var cur = parseFloat($('time_limit_input').getValue());
+		if ((cur + amount) >= 0) {
+			$('time_limit_input').value = cur + amount;
+		}
+	}
+</script>
+
+<% else %>
+	<h1 id="must_be_logged_in_to_create_runs!">You must be logged in to create runs!</h1>
+<% end %>

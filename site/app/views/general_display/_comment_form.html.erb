@@ -1,0 +1,43 @@
+<style type="text/css" media="screen">
+	textarea#comment {
+		margin: 0px;
+		padding: 3px;
+		border: 1px solid gray;
+		background:#E8E8E6;
+	}
+</style>
+
+<% form_tag( {:action => "leave_comment", 
+		:controller => 'general_display'},
+		:id => "comment_form"
+	) do %>
+  	<%= hidden_field_tag "commenturl", request.request_uri.to_s %>
+	<div class="sidebar_header">Comments/Bugs:</div>
+	<%= text_area_tag 'comment', "Find any bugs? Have suggestions? Leave feedback here...", :rows => 4, :cols => 27 %><p>
+
+		<span class="buttons"><%= link_to_remote "Send", :url => {
+				:action => "leave_comment", 
+				:controller => 'general_display'
+			}, :html => {:class => 'icon smallbutton'},
+			:before => update_page { |pg| 
+				pg[:comment_status].replace_html "Sending..."
+				pg[:comment_status].appear
+			}, :with => "Form.serialize('comment_form')",
+      # Post annoying message
+			:confirm => session[:user] ? nil : "Are you a spambot? If not, you must include the string 'notspam' in your comment. For example: \"Hi, mlcomp is great, wonderful job! --notspam\"" %></span><span id="comment_status" style="display:none">empty</span>
+<% end -%>
+
+<script type="text/javascript" charset="utf-8">
+	function showResult()
+	{
+	   $('comment').onfocus = function() {
+	     // if already cleared, do nothing
+	     if (this._cleared) return
+
+		 // otherwise clear this
+		 this.clear()
+	     this._cleared = true
+	   }
+	};
+	showResult();
+</script>

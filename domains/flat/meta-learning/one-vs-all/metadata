@@ -1,0 +1,4 @@
+name: one-vs-all
+description: Reduction from multiclass classification to binary classification.
+task: MulticlassClassification
+construct: binaryLearner:Program[BinaryClassification]

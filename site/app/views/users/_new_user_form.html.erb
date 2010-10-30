@@ -1,0 +1,42 @@
+<%= error_messages_for :user, :header_message => nil %>
+
+<% form_for :user, :url => {:action => action, :id => id} do |f| %>
+
+  <% if true %>
+    <p>
+      <b>Username</b><span class="error"> <%= @errors && @errors.on(:username) %></span><br/> 
+      <%= f.text_field :username %>
+    </p>
+
+    <p>
+      <b>Password</b><span class="error"> <%= @errors && @errors.on(:password) %></span><br/> 
+      <%= f.password_field :password %>
+    </p>
+    <p>
+      <b>Confirm password</b><br />
+      <%= f.password_field :password_confirmation %>
+    </p>
+
+    <br/>
+  <% end %>
+
+  <p>
+    <b>Full name</b><span class="error"> <%= @errors && @errors.on(:fullname) %></span><br/> 
+    <%= f.text_field :fullname %>
+  </p>
+
+  <p>
+    <b>Email (we will not spam you)</b><span class="error"> <%= @errors && @errors.on(:email) %></span><br/> 
+    <%= f.text_field :email %>
+  </p>
+
+  <p>
+    <b>Affiliation (e.g., school, company, etc.)</b><br />
+    <%= f.text_field :affiliation %>
+  </p>
+
+  <p>
+    <%= f.submit submitText %>
+  </p>
+
+<% end %>

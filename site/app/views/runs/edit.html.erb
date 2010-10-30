@@ -1,0 +1,13 @@
+<h1>Editing run</h1>
+
+<%= error_messages_for :run %>
+
+<% form_for(@run) do |f| %>
+  <p>
+    <%= collection_select("run", "program_id" , Program.find(:all), "id", "name") %>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @run %> |
+<%= link_to 'Back', runs_path %>

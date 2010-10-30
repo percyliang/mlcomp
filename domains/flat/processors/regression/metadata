@@ -1,0 +1,3 @@
+name: regression-utils
+description: Validates and inspects a dataset in Regression format.
+task: Inspect Split Strip

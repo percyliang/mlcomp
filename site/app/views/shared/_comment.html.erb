@@ -1,0 +1,29 @@
+	<div class="comment_box">
+		<div class="comment_picture">
+			<%= image_tag "icon_profile.gif" %>
+		</div>
+		<div class="comment_info">
+			<strong><%= comment.user.fullname %></strong> (<%= link_to comment.user.username, {:controller => "users", :action => "show", :id => comment.user[:id]} %>)<br>
+			<%= comment.user.affiliation %><br>
+			Posted at <%= comment.created_at.to_s %>
+			 <% if session[:user] && (session[:user].id == comment.user[:id]) %>
+			<br>
+			<span class="buttons">
+			<%= link_to_remote "Delete Comment",  :url => {
+				:controller => 'general_display', :action => "delete_comment", :id => comment.id },
+				:html => {:class => 'smallbutton'} 
+				# , :confirm => "Are you certain you want to delete this comment?" 
+			%>
+			</span>
+			<% end %>
+		</div>
+		<div class="comment_contents">
+			<div class="comment_title">
+				<%= comment.title %>
+			</div>
+			<div class="comment_body">
+				<%= comment.comment %>
+			</div>
+		</div>
+		<div style="clear:both"></div>
+	</div>

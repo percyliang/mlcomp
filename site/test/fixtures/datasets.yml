@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  name: MyString
+  description: MyText
+  source: MyText
+  task_type: MyString
+
+two:
+  name: MyString
+  description: MyText
+  source: MyText
+  task_type: MyString

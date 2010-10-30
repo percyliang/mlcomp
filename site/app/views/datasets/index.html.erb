@@ -1,0 +1,30 @@
+<% content_for :sidebar do %>
+  <div class="sidebar_header">
+  	Dataset Actions:
+  </div>
+  <div class="buttons">
+    <%= make_list "ul", [datasetNewButton] %>
+  </div>
+<% end %>
+
+<p>A <a href="/help/index.html#datasets">dataset</a> is the input into a machine
+learning program.</p>
+
+<%
+if sessionDatasetFormats[0] != '(all)' then
+  domain = Domain.get(sessionDatasetFormats[0]) %>
+  <div class="blurb">
+  <b><%= sessionDatasetFormats[0] %>:</b>
+  <%= domain.datasetDescription %>
+  <p>Click here to see a <%= link_to 'sample dataset', :controller => 'datasets', :action => 'show', :id => domain.sampleDataset %>.</p>
+  </div>
+<% end %>
+
+<p>
+The table below shows everyone's datasets that have been processed successfully in <%= sessionDatasetFormatStr %>.
+To see only your datasets, go to <%= link_to 'my stuff', :controller => 'my_stuff' %>.
+</p>
+
+<p><b>To create a run, first click on a dataset</b>.</p>
+
+<%= render :partial => 'table/many_table_show', :locals => { :tparams => @tparams } %>

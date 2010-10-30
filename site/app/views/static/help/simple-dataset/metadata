@@ -1,0 +1,3 @@
+name: simple-dataset
+description: A simple dataset for testing out the mlcomp infrastructure.
+format: MulticlassClassification

@@ -1,0 +1,4 @@
+name: supervised-learning
+description: Main entry for supervised learning for training and testing a program on a dataset.
+task: Main
+construct: learner:Program dataset:Dataset stripper:Program[Strip] evaluator:Program[Evaluate]

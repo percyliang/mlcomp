@@ -1,0 +1,17 @@
+outcome = ""
+@errors.each do |error|
+  outcome << "<li><span style='color:red'>Error:</span> " + (h error.inspect.to_s) + "</li>\n"
+end
+@successes.each do |success|
+  outcome << ("<li><span style='color:green'>Success:</span> " + 
+    success[:dataset] + " - " + success[:program] + "</li>\n")
+end
+outcome = "<ol>\n" + outcome + "</ol>\n"
+page.insert_html (:bottom, :creation_result, outcome)
+# page.insert_html :bottom, :creation_result, "<p>You may try again</p>"
+# page['multiple_runs_form'].enable
+page[:creation_result].highlight 
+page.delay(3) do
+  page.call "window.close()"
+  # page.redirect_to :action => 'index'
+end

@@ -1,0 +1,21 @@
+<% content_for :sidebar do %>
+  <div class="sidebar_header">
+  	Dataset Actions:
+  </div>
+  <div class="buttons">
+    <%= make_list "ul", [datasetShowButton, datasetEditButton, datasetDeleteButton, datasetNewButton, datasetShowAllButton] %>
+  </div>
+<% end %>
+
+<h3>Re-uploading dataset <%= @dataset.name %>:</h3><br>
+<% form_tag({:action => 'replace'}, {:multipart => true}) do |f| %>
+
+  <b style="color:red">Warning: Replacing this dataset will delete all of its <%= @dataset.runs.size %> run(s)!</b>
+
+  <p>
+    <p>Enter either a single data file or a zip file containing multiple files, including a file called <tt>metadata</tt>:<p>
+    <input type="file" name="upload"/>
+    <%= submit_tag "Upload", :confirm => datasetDeleteConfirm %>
+  </p>	
+
+<% end %>

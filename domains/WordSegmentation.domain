@@ -1,0 +1,45 @@
+name: WordSegmentation
+kind: performing
+taskDescription: |-
+  This is an unsupervised learning task where we are given an unsegmented sequence of characters (phonemes) as input
+  and the goal is to determine the word boundaries and output the words.
+datasetDescription: |-
+  The input is just one file in UTF8 format containing sentences, one per line.
+  Example input:
+  <pre>
+  thisisatest
+  </pre>
+  Example output:
+  <pre>
+  this is a test
+  </pre>
+sampleDataset: word-segmentation-sample
+utilsProgram: word-segmentation-utils
+evaluatorProgram: word-segmentation-utils
+datasetFields:
+  - name: "#sent"
+    type: integer
+    value: raw/numSentences
+    description: Number of sentences.
+  - name: "#words"
+    type: integer
+    value: raw/numWords
+    description: Number of words.
+runFields:
+  - name: Time
+    type: time
+    value: perform/time
+    description: Time to perform the task.
+  - name: Precision
+    type: double
+    value: evaluate/precision
+    description: Word token precision.
+  - name: Recall
+    type: double
+    value: evaluate/recall
+    description: Word token recall.
+  - name: F1
+    type: double
+    value: evaluate/f1
+    description: F1 score (harmonic mean of precision and recall).
+errorFieldValue: evaluate/errorRate

@@ -1,0 +1,30 @@
+<% if tparams.size > 0 %>
+
+<%
+table_name = tparams.first[1][:name]
+select_field_name = 'format_' + table_name
+dropdown_options = []
+tparams.each do |key,tp|
+  dropdown_options << [key, tp.to_json]
+end
+%>
+	
+<div style="margin: 0 auto;width:auto" id="dset_table_container">
+  <% if tparams.size > 1 %>
+    <% dropdown = select_tag(select_field_name, options_for_select(dropdown_options)) %>
+  <% else %>
+    <% dropdown = select_tag(select_field_name, options_for_select(dropdown_options), :style => "display:none") %>
+  <% end %>
+	<%= render :partial => 'table/table_container', 
+    :locals => { :table_params => tparams.first[1], :dropdown => dropdown } %>
+</div>
+
+<%= observe_field select_field_name,
+	:on => "selected" ,
+	:before  => "Element.show('spinner')",
+	:success => "Element.hide('spinner')",
+	:function => "setTableData('#{table_name}', value);
+		updateTable('#{table_name}');"
+%>
+
+<% end %>

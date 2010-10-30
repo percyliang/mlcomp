@@ -1,0 +1,20 @@
+<%= error_messages_for :user %>
+<% form_for :user do |f| -%>
+<table id="newedit">
+    <thead>
+        <tr>
+            <th colspan="2" >Request link to reset password</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td align="right"><label>Email:</label></td>
+            <td><%= f.text_field :email %></td>
+        </tr>       
+        <tr>
+            <td></td>
+            <td><%= submit_tag 'Submit' %></td>
+        </tr>
+    </tbody>
+</table>
+<% end -%>

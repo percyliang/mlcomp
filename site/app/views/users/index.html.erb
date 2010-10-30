@@ -1,0 +1,35 @@
+<h4>Users</h4>
+
+<table>
+  <tr>
+    <th>Username</th>
+    <th>Full Name</th>
+    <th>Email</th>
+	<th>Created</th>
+	<th># Datasets</th>
+	<th># Programs</th>
+	<th># Runs</th>
+	<th> </th>
+	<th> </th>
+	<th> </th>
+  </tr>
+
+<% for user in @users %>
+  <tr>
+    <td><%=h user.username %></td>
+    <td><%=h user.fullname %></td>
+    <td><%=h user.email %></td>
+    <td><%=h user.created_at.to_s %></td>
+    <td><%=h user.datasets.length.to_s %></td>
+    <td><%=h user.programs.length.to_s %></td>
+    <td><%=h user.runs.length.to_s %></td>
+    <td><%= link_to 'Edit', :action => :edit, :id => user.id %></td>
+    <td><%= link_to 'LoginAs', :action => :loginas, :id => user.id %></td>
+    <td><%= link_to 'Destroy', :action => :destroy, :id => user.id, :confirm => 'Are you sure?' %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New user', :action => :new %>

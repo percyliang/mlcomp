@@ -1,0 +1,25 @@
+<% inside_layout 'base_layout_new' do %>
+
+<div id="left_of_three_column">
+	<%= yield :left_column %>
+</div>
+
+<div id="center_of_three_column">
+	<%= yield %>
+</div>
+
+<div id="right_column">
+	<%= render :partial => 'general_display/dataset_format_selector' %>
+	<%= render(:partial => 'shared/default_sidebar') %>
+	<%# (sidebar = yield :sidebar) ? sidebar : render(:partial => 'shared/default_sidebar') %>
+	<%= yield :sidebar %>
+	<%= image_tag 'ajax-loader.gif', :id => 'spinner', :style => 'display:none' %>
+</div>
+
+
+<div id="footer">
+	<%= yield :footer %>
+	<p>&nbsp;</p>
+</div>
+
+<% end %>

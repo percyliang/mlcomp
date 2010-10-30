@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Setup environment variables used in MLcomp.
+# Important: always source this file from this current directory as follows:
+#   . ./rc
+
+export RAILS_ENV=production
+export MLCOMP_SOURCE_PATH=$PWD
+export MLCOMP_BASE_PATH=$PWD/var
+export TMP_PATH=$MLCOMP_BASE_PATH/tmp
+export DOMAINS_PATH=$PWD/domains
+
+alias r=$MLCOMP_SOURCE_PATH'/site/script/mlcomp/resource'
+
+[ -e 'local.rc' ] && . local.rc

@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Run this script once to install MLcomp.
+
+. ./rc
+
+# Create the database.
+cat <<EOF | mysql -u root -p
+create database mlcomp_development;
+grant all on mlcomp_development.* to rails_user@localhost;
+EOF
+
+# Update the database schema by doing Rails migrations.
+./update-db

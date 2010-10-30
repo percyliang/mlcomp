@@ -1,0 +1,4 @@
+name: supervised-learning-processor
+description: Main entry point for validating and inspecting a dataset for supervised learning datasets.
+task: Main
+construct: Dataset Program[Inspect] Program[Split]

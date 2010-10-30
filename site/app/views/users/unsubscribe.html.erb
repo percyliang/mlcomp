@@ -1,0 +1,11 @@
+<% if @user.receive_emails %>
+<h2>Please confirm that you want to unsubscribe</h2>
+<label>User:</label> <%= @user.username %> <br>
+<label>Name:</label> <%= @user.fullname %> <br>
+<label>User:</label> <%= @user.email %> <br>
+<%= link_to 'Confirm', :controller => 'users', :action => 'unsubscribe', :id => @user.id, :confirm => true, :code => @code %>
+<% else %>
+<h2>Our records indicate that you are not subscribed to mlcomp's emails list</h2>
+
+The email address <%= @user.email %> is not subscribed to our list. If this is in error, please contact mlcomp.support@gmail.com for more information.
+<% end -%>

@@ -1,0 +1,13 @@
+<div id="format_filter_box">
+	<% form_tag "format_filter_form" do %>
+    <div class="sidebar_header">Domain [<a href="/faq/domains">what's this?</a>]</div>
+      <%= select_tag "format_filter_selection", 
+			options_for_select(["(all)"] + Domain.names, 
+				session[:format_filter] || "(all)"), :style => 'margin: 5px; padding:2px 10px; font-size: 1.1em;' %>
+	<% end -%>
+	<%= observe_field "format_filter_selection",
+	 	:url => {:controller => 'general_display', :action => 'update_format_filter'},
+		:with => "Form.Element.serialize('format_filter_selection')",
+		:on => "selected"
+	%>
+</div>

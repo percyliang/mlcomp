@@ -1,0 +1,47 @@
+name: OnlineLearningMulticlass
+kind: interactive-learning
+taskDescription: |-
+  The goal of this task is to learn how to classify data points represented as real vectors into one of K classes.
+datasetDescription: |-
+  The datashard is presented one at a time. The feature vector is presented first, through STDIN:
+  <pre>
+  featureIndex:featureValue ... featureIndex:featureValue
+  </pre>
+  where featureIndex is a positive integer and featureValue is a real number. 
+  The feature indices must be sorted in increasing order.
+  The program should output to STDOUT its prediction:
+  <pre>
+  predicted-output
+  </pre>
+  where predicted-output element of {1, 2, ..., K}. The program does not know there are K classes, and it must find out through experience.
+  Once prediction is received, the correct label is presented through STDIN:
+  <pre>
+  correct-label
+  </pre>
+  where correct-label element of {1, 2, ..., K}.
+sampleDataset: online-multiclass-sample
+utilsProgram: online-multiclass-utils
+evaluatorProgram: online-multiclass-utils
+datasetFields:
+  - name: "#data"
+    type: integer
+    value: raw/numExamples
+    description: Number of examples.
+  - name: "#dimension"
+    type: integer
+    value: raw/dim
+    description: The dimension of the feature vector.
+  - name: "#labels"
+    type: integer
+    value: raw/K
+    description: Number of output classes (labels).
+runFields:
+  - name: Error
+    type: double
+    value: evaluate/errorRate
+    description: Fraction of misclassified examples.
+  - name: Time
+    type: time
+    value: interact/time
+    description: Time to interact with examples.
+errorFieldValue: evaluate/errorRate

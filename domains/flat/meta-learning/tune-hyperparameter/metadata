@@ -1,0 +1,4 @@
+name: tune-hyperparameter
+description: Sets the hyperparameter
+task: BinaryClassification MulticlassClassification
+construct: numProbes:int learner:Program splitter:Program evaluator:Program[Evaluate]

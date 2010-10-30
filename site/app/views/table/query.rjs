@@ -1,0 +1,4 @@
+tname = @table_params[:name]
+pagname = @table_params[:name].to_s + "_pagination"
+page[tname].replace_html :partial => 'table_data'
+page[pagname].replace_html pagination_line(@table_params, @items.length, @total)

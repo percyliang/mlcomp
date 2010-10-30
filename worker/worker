@@ -1,0 +1,467 @@
+#!/usr/bin/ruby
+
+# This is the MLcomp worker: contacts the master for runs to perform.
+# Last updated 10/06/10.
+
+# MLcomp: website for automatic and standarized execution of algorithms on datasets.
+# Copyright (C) 2010 by Percy Liang and Jake Abernethy
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+$version = `cat version`.to_i
+$cmd = [$0]+ARGV
+
+require 'xmlrpc/client'
+require 'thread'
+require File.dirname($0)+'/args'
+require File.dirname($0)+'/general'
+
+def prompt(promptStr, hidden=false)
+  print promptStr
+  system "stty -echo" if hidden
+  line = gets
+  system "stty echo" if hidden
+  puts if hidden
+  line.chomp
+end
+
+class Format
+  def self.space(b) # In bytes
+    return nil if not b
+    b = b.to_i
+    mb = (b / (1024*1024)).to_i
+    kb = (b / 1024).to_i
+    return "#{mb}M" if mb > 0
+    return "#{kb}K" if kb > 0
+    "#{b}"
+  end
+  def self.time(s) # In seconds
+    return nil if not s
+    s = s.to_i
+    m = s / 60; s %= 60
+    h = m / 60; m %= 60
+    d = h / 24; h %= 24
+    y = d / 365; d %= 365
+    return "#{y}y#{d}d" if y > 0
+    return "#{d}d#{h}h" if d > 0
+    return "#{h}h#{m}m" if h > 0
+    return "#{m}m#{s}s" if m > 0
+    return "#{s}s"
+  end
+end
+
+class Worker
+  def Worker.main(args)
+    worker = Worker.new(args)
+  end
+
+  def initialize(args)
+    @sleepInterval, @verbose, @serverHost, @serverPort, @workingPath, @giveUp = extractArgs(:args => args, :spec => [
+      ['sleepInterval', Fixnum, 5],
+      ['verbose', Fixnum, 0],
+      ['server', String, nil],
+      ['port', Fixnum, 8712],
+      ['workingPath', String, '.'],
+      ['giveUp', TrueClass], # Tell server that we've given up on the assigned job
+    nil])
+
+    @maxFileSize = 1024*1024 # 1MB: allowed to transfer to master
+
+    if not @serverHost
+      if File.exists?('server')
+        line = IO.readlines('server')[0]
+        @serverHost = line.chomp if line
+      end
+    end
+    if not @serverHost
+      puts "No server host specified (use either -server or create a file called server)"
+      exit 1
+    end
+
+    puts "=== Worker version #{$version} ==="
+
+    systemOrFail('mkdir', '-p', @workingPath)
+    @workerHandlePath = @workingPath+"/workerHandle"
+    @scratchPath = File.expand_path(@workingPath+'/scratch')
+    #@zipPath = @workingPath+'/_contents.zip'
+
+    @hostname = `hostname -f`.chomp
+    puts "Starting worker on #{@hostname}, workingPath = #{@workingPath}"
+
+    @mutex = Mutex.new
+    connect
+
+    if File.exists?(@workerHandlePath)
+      @workerHandle = File.read(@workerHandlePath).chomp
+    else
+      username = prompt("MLcomp username: ")
+      password = prompt("MLcomp password: ", true)
+      response = call("GetNewWorkerHandle", username, password)
+      if success(response)
+        @workerHandle = getField(response, 'handle')
+        IO.writelines(@workerHandlePath, [@workerHandle])
+      else
+        puts "ERROR FROM SERVER (in getting a worker handle): #{response['message']}"
+        exit 1
+      end
+    end
+    puts "workerHandle = #{@workerHandle}"
+
+    if @giveUp
+      puts "Giving up on any jobs..."
+      response = call("GiveUpOnJob", @workerHandle)
+      puts response['message']
+    else
+      startMonitorThread
+      performJobsLoop
+    end
+  end
+
+  def connect
+    @mutex.synchronize {
+      puts "Connecting to #{@serverHost}:#{@serverPort}..."
+      @server = XMLRPC::Client.new(@serverHost, "/", @serverPort, nil, nil, nil, nil, nil, 600)
+    }
+  end
+
+  def killCurrentJob(message)
+    if not @jobPid
+      puts "Server asked me to kill run, but don't have run, so ignoring request..."
+      return
+    end
+    puts "KILL #{@jobPid}: #{message}"
+    begin
+      # Should only need to do this to top-level pid, but just in case...
+      #Process.kill('TERM', @jobPid)
+      getAllDescendantPids(@jobPid).each { |pid|
+        Process.kill('TERM', pid)
+      }
+      # FUTURE: do another round of KILL just in case
+      # Explain reason for killing
+      out = open(@scratchPath+"/log", "a")
+      out.puts("Worker killed run: #{message}")
+      out.close
+    rescue Exception => e
+      puts "Failed to kill: #{e.message}"
+    end
+  end
+
+  def getAllDescendantPids(rootPid)
+    childrenMap = {}
+    Dir["/proc/[0-9]*"].each { |dir|
+      dir =~ /(\d+)/
+      pid = $1.to_i
+      next unless File.exists?("#{dir}/status")
+      ppid = readConfig("#{dir}/status", 'PPid').to_i
+      #puts "#{pid} #{ppid}"
+      a = childrenMap[ppid] = childrenMap[ppid] || []
+      a << pid
+    }
+    def recurse(childrenMap, descendants, pid)
+      descendants << pid
+      (childrenMap[pid] || []).each { |cpid|
+        recurse(childrenMap, descendants, cpid)
+      }
+      descendants
+    end
+    recurse(childrenMap, [], rootPid)
+  end
+
+  def readConfig(path, key)
+    begin
+      getConfig(IO.readlines(path), key)
+    rescue
+      nil
+    end
+  end
+  def getConfig(lines, key)
+    lines.each { |line| return $1 if line =~ /^\s*#{key}\s*:\s*(.+)$/ }
+    nil
+  end
+  def freeMemory
+    free = readConfig('/proc/meminfo', 'MemFree').split[0].to_i*1000
+    cached = readConfig('/proc/meminfo', 'Cached').split[0].to_i*1000
+    free+cached
+  end
+
+  def call(*args)
+    puts "server.call: #{args[0]}" if @verbose >= 2
+    response = nil
+    @mutex.synchronize {
+      (0...3).each {
+        begin
+          response = @server.call(*args)
+          break if response.is_a?(Hash)
+          puts "ERROR: got non-Hash response: "+response.inspect
+        rescue Exception => e
+          puts "ERROR calling #{args.inspect}, trying again..."
+          puts "#{e.message}\n#{e.backtrace.join("\n")}"
+        end
+      }
+    }
+    response
+  end
+
+  def sendStatus
+    puts "sendStatus()" if @verbose >= 2
+
+    # Populate worker fields
+    status = {}
+    setIntField(status, 'workerVersion', $version)
+    setField(status, 'host', @hostname)
+    setIntField(status, 'numCPUs', readConfig('/proc/cpuinfo', 'cpu cores').to_i)
+    setIntField(status, 'cpuSpeed', readConfig('/proc/cpuinfo', 'cpu MHz').to_i)
+    setIntField(status, 'maxMemory', freeMemory)
+    setIntField(status, 'maxDisk', `df #{@workingPath} | tail -1`.split[3].to_i*1000)
+
+    # Populate job fields
+    logContents = nil
+    if @job
+      if @jobPid
+        pids = getAllDescendantPids(@jobPid)
+        # Compute various quantities
+        # Related reference on /proc/<pid>/stat: http://brokestream.com/procstat.html
+        jobCPU = 0
+        jobMemory = 0
+        jobDiskRead = 0
+        jobDiskWrite = 0
+        pids.each { |pid|
+          jobCPU += 0 # FUTURE
+          jobMemory += (readConfig("/proc/#{pid}/status", 'VmSize') || "0").split[0].to_i*1000
+          jobDiskRead += 0 #readConfig("/proc/#{pid}/io", 'read_bytes').to_i
+          jobDiskWrite += 0 #readConfig("/proc/#{pid}/io", 'write_bytes').to_i
+        }
+        jobDisk = `du -sb #{@scratchPath}`.split[0].to_i
+        jobRealTime = Time.now.to_i - @jobStartTime
+        jobUserTime = IO.readlines("/proc/#{@jobPid}/stat")[0] =~ /^(\d+) \([^\)]+\) (.*)$/ ? $2.split[11].to_i : -1
+
+        setIntField(status, 'jobCPU', jobCPU)
+        setIntField(status, 'jobMemory', jobMemory)
+        setIntField(status, 'jobDiskRead', jobDiskRead)
+        setIntField(status, 'jobDiskWrite', jobDiskWrite)
+        setIntField(status, 'jobDisk', jobDisk)
+        setIntField(status, 'jobRealTime', jobRealTime)
+        setIntField(status, 'jobUserTime', jobUserTime)
+
+        # Enforce limits
+        jobTime = jobRealTime
+        allowedTime = getIntField(@job, 'allowedTime') 
+        if allowedTime && jobTime > allowedTime
+          killCurrentJob("Current time usage #{Format.time(jobTime)} exceeds allowed #{Format.time(allowedTime)}")
+        end
+        allowedMemory = getIntField(@job, 'allowedMemory') 
+        if allowedMemory && jobMemory > allowedMemory
+          killCurrentJob("Current memory usage #{Format.space(jobMemory)} exceeds allowed #{Format.space(allowedMemory)}")
+        end
+        allowedDisk = getIntField(@job, 'allowedDisk') 
+        if allowedDisk && jobDisk > allowedDisk
+          killCurrentJob("Current disk usage #{Format.space(jobDisk)} exceeds allowed #{Format.space(allowedDisk)}")
+        end
+        puts "Running job #{@job['id']} (pids #{pids.join(' ')}): time #{Format.time(jobTime)}, mem #{Format.space(jobMemory)}, disk #{Format.space(jobDisk)}"
+      end
+
+      # Send tail end of log file if we haven't done so
+      if File.exists?(@logPath)
+        size = File.size(@logPath)
+        if size > @logBytesSent # More bytes to send
+          f = open(@logPath)
+          f.seek(@logBytesSent)
+          logContents = f.read([@maxFileSize-@logBytesSent,0].max) # Limit by maxFileSize
+          f.close
+          if @logBytesSent + logContents.size < size # Didn't send everything
+            logContents += "\n(file truncated)"
+          end
+          setBase64Field(status, "jobLog", logContents)
+        end
+      end
+    end
+
+    response = call("SetWorkerStatus", @workerHandle, status)
+
+    if not response.is_a?(Hash)
+      puts "ERROR FROM SERVER (in setting worker status): non-Hash #{response}"
+    elsif success(response)
+      @logBytesSent += logContents.size if logContents # Increment pointer
+
+      # Respond to any commands
+      command = response['command']
+      if command
+        case command
+          when 'killCurrent'
+            killCurrentJob("Killed by server request")
+          when 'updateVersion'
+            @updateVersionInfo = response
+          else
+            puts "ERROR: unknown command: #{command}"
+        end
+      end
+    else
+      puts "ERROR FROM SERVER (in setting worker status): #{response['message']}"
+    end
+  end
+
+  def updateVersion(info)
+    puts "Updating from version #{$version}..."
+    contents = getBase64Field(info, 'contents')
+    contentsPath = "#{@workingPath}/contents.zip"
+    out = open(contentsPath, "wb")
+    out.write(contents)
+    out.close
+    changePath(@workingPath) {
+      systemOrFail('unzip', '-o', contentsPath)
+    }
+    puts "Restarting: #{$cmd.join(" ")}"
+    exec(*$cmd)
+  end
+
+  def performJob(job)
+    @job = job
+    id = getField(job, 'id')
+    puts "======= Running job #{id}"
+
+    # Setup environment
+    #puts "=== Setting up environment"
+    #systemOrFail('rm', '-rf', @scratchPath)
+    #Dir.mkdir(@scratchPath)
+    #contents = getBase64Field(job, 'contents')
+    #out = open(@zipPath, "wb")
+    #out.write(contents)
+    #out.close
+    #puts "Received a #{Format.space(File.size(@zipPath))} zip file from server"
+    #systemOrFail('unzip', '-q', @zipPath, '-d', @scratchPath)
+    #File.unlink(@zipPath)
+    @logPath = @scratchPath+"/log"
+    @logBytesSent = 0
+
+    # Run job
+    puts "=== Executing command"
+    command = getField(job, 'command')
+    @jobStartTime = Time.now.to_i
+    @jobPid = fork { exec("cd #{@scratchPath} && (#{command})") }
+    sleep 1; sendStatus # Make sure we send some sort of status
+    Process.waitpid(@jobPid)
+    exitCode = $?.exitstatus || -1
+    puts "exitCode: #{exitCode}"
+    @jobPid = nil
+
+    # Send results back
+    puts "=== Sending results back"
+    result = {}
+    setField(result, 'id', id)
+    setField(result, 'exitCode', exitCode)
+
+    if getField(job, 'returnContents') # Expensive, but necessary for data processing runs!
+      #fullZipPath = File.expand_path(@zipPath) # Get full path
+      #puts "Zipping..."
+      #changePath(@scratchPath) {
+      #  systemOrFail('zip', '-q', '-r', fullZipPath, '.')
+      #}
+      #puts "Finished creating zip file"
+      #setBase64Field(result, 'contents', File.read(@zipPath))
+      #puts "Sending a #{Format.space(File.size(@zipPath))} zip file to server..."
+      setField(result, 'contentsHost', @hostname)
+      setField(result, 'contentsLocation', @scratchPath)
+    else
+      # Just send back the key files (program status and console output log)
+      statusPath = "#{@scratchPath}/status"
+      if File.exists?(statusPath)
+        setBase64Field(result, 'status', File.read(statusPath, @maxFileSize))
+      end
+
+      logPath = "#{@scratchPath}/log"
+      if File.exists?(logPath)
+        setBase64Field(result, 'log', File.read(logPath, @maxFileSize))
+      end
+    end
+
+    response = call("SetJobResult", @workerHandle, result)
+    if success(response)
+      puts "Result accepted by server"
+    else
+      puts "ERROR FROM SERVER (in sending back results): #{response['message']}"
+    end
+
+    # Cleanup
+    #File.unlink(@zipPath) if File.exists?(@zipPath)
+    systemOrFail('rm', '-rf', @scratchPath)
+    @job = nil
+
+    puts "=== Done"
+  end
+
+  def startMonitorThread
+    @monitorThread = Thread.new {
+      while not @done
+        begin
+          sendStatus
+        rescue Exception => e
+          puts "ERROR IN MONITORING THREAD: #{e}"
+          puts "#{e.message}\n#{e.backtrace.join("\n")}"
+          connect
+        end
+        sleep @sleepInterval
+      end
+    }
+  end
+
+  def performJobsLoop
+    while not @done
+      didSomething = false
+      begin
+        updateVersion(@updateVersionInfo) if @updateVersionInfo
+
+        systemOrFail('rm', '-rf', @scratchPath)
+
+        # Contact master to get job
+        job = call("GetJob", @workerHandle, {'contentsHost' => @hostname, 'contentsLocation' => @scratchPath})
+        if success(job)
+          if job['id']
+            performJob(job)
+            didSomething = true
+          end
+        else
+          puts "ERROR FROM SERVER (in getting a job): #{job['message']}"
+          @done = true
+          didSomething = true
+        end
+      rescue Exception => e
+        puts "NASTY ERROR: #{e}"
+        puts "#{e.message}\n#{e.backtrace.join("\n")}"
+        @job = nil
+        connect
+      end
+      sleep @sleepInterval unless didSomething
+    end
+
+    puts "Joining monitor thread..."
+    @monitorThread.join
+  end
+
+  def success(response)
+    puts "server.response: success = #{response['success']}, message = #{response['message']}" if @verbose >= 1
+    response['success'] == true
+  end
+
+  # Get/set fields
+  # Note: we need to convert integers to string because
+  # integers might be too big (Bignum) for XMLRPC
+  def getField(map, key); value = map[key]; raise "Missing field '#{key}'" if value == nil; value end
+  def getIntField(map, key); getField(map, key).to_i end
+  def getBase64Field(map, key); XMLRPC::Base64.decode(getField(map, key)) end
+  def setField(map, key, value); raise "Empty value not allowed for '#{key}'" if value == nil; map[key] = value end
+  def setIntField(map, key, value); setField(map, key, value.to_s) end
+  def setBase64Field(map, key, value); setField(map, key, XMLRPC::Base64.encode(value)) end
+end
+
+Worker.main(ARGV)

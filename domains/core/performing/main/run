@@ -1,0 +1,33 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+# Main entry point for performing tasks (e.g., unsupervised learning).
+# Takes in a performer, dataset, and other stuff and does all the running.
+cmd = ARGV.shift
+case cmd
+  when 'construct' then
+    saveArgs
+  when 'execute' then
+    performer, dataset, stripper, evaluator =
+      loadArgs(:directory, :directory, :directory, :directory)
+
+    datashard = dataset+"/raw"
+    inPath = "input"
+    outPath = "output"
+
+    # Prepare data
+    puts "===== MAIN: prepare data ====="
+    exitIfFail('strip', runProgram(stripper, 'stripLabels', file(datashard), file(inPath)))
+    puts
+
+    # Learn
+    puts "===== MAIN: perform task ====="
+    exitIfFail('perform', runProgram(performer, 'perform', file(inPath), file(outPath)))
+    exitFail("On ./run perform <in> <out>, your program (#{performer}) did not write to <out>.") if not File.exists?(outPath)
+    puts
+
+    # Evaluate
+    puts "===== MAIN: evaluate performance ====="
+    exitIfFail('evaluate', runProgram(evaluator, 'evaluate', file(datashard), file(outPath)))
+end

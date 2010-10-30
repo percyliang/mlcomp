@@ -1,0 +1,7 @@
+Sample NN B-NP
+dataset NN I-NP
+
+Potatoes NN B-NP
+in IN B-PP
+the DT B-NP
+bag NN I-NP

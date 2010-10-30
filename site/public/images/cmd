@@ -1,0 +1,4 @@
+wget http://www.clipartpal.com/_thumbs/pd/education/large_open_book.png -O book.png
+wget http://www.clker.com/cliparts/4/b/8/d/1194983813750083554server_mimooh_.svg.med.png -O server.png
+wget http://www.clker.com/cliparts/b/1/6/b/1195431327409717356database_base_de_donn__01r.svg.med.png -O database.png
+convert oldbook.png -fuzz 10% -transparent white book.png

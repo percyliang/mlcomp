@@ -1,0 +1,3 @@
+name: regression-sample
+format: Regression
+description: Sample dataset for sanity checking.

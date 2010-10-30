@@ -1,0 +1,49 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+# Given a datashard (with true labels) and a predictions file, compute the error.
+# Output results to a YAML file
+# errorRate is 1-f1 is it's a chunking task, 1-accuracy if not
+cmd = ARGV.shift
+case cmd
+  when 'evaluate' then
+    truePath, predPath = parseArgs(:file, :file)
+    # The last column of the two files is the output to keep
+    out = open("outputs", "w")
+    lineNum = 0
+    # See if this is a chunking task (meaning that all the labels are either [BI]-<X> or O)
+    isChunkingTask = true
+    IO.foreach2(truePath, predPath) { |a,b|
+      lineNum += 1
+      a = (a || "").split.last
+      b = (b || "").split.last
+      if a && !(a =~ /^[BI]-/ || a =='O')
+        isChunkingTask = false
+      end
+      exitFail("Output differs on line #{lineNum}: true has '#{a}', pred has '#{b}'") if (a == nil) != (b == nil)
+      if a && b
+        out.puts "x #{a} #{b}"
+      else
+        out.puts
+      end
+    }
+    out.close
+    if not system("perl conlleval.pl < outputs > evaluation")
+      exitFail("Perl script failed")
+    else
+      # Parse evaluation (format):
+      # processed 215 tokens with 98 phrases; found: 95 phrases; correct: 76.
+      # accuracy:  86.05%; precision:  80.00%; recall:  77.55%; FB1:  78.76
+      # ...
+      line = IO.readlines('evaluation')[1] 
+      if line =~ /accuracy:\s*([\d\.]+).*precision:\s*([\d\.]+).*recall:\s*([\d\.]+).*FB1:\s*([\d\.]+)/
+        accuracy, precision, recall, f1 = $1.to_f, $2.to_f, $3.to_f, $4.to_f
+        errorRate = isChunkingTask ? 100-f1 : 100-accuracy
+        writeStatus('accuracy' => accuracy/100, 'precision' => precision/100, 'recall' => recall/100, 'f1' => f1/100,
+                    'errorRate' => errorRate/100)
+      else
+        exitFail("Unable to parse evaluation: #{line.chomp}")
+      end
+    end
+end

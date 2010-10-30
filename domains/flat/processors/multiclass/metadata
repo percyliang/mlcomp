@@ -1,0 +1,3 @@
+name: multiclass-utils
+description: Validates and inspects a dataset in MulticlassClassification format.
+task: Inspect Split Strip

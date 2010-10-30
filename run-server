@@ -1,0 +1,1 @@
+cd site && script/mlcomp/run-server "$@"

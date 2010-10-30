@@ -1,0 +1,37 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+# Main entry point for supervised prediction tasks (e.g. classification, regression).
+# Takes in a learner, dataset, and other stuff and does all the running.
+cmd = ARGV.shift
+case cmd
+  when 'construct' then
+    saveArgs
+  when 'execute' then
+    learner, dataset, stripper, evaluator =
+      loadArgs(:directory, :directory, :directory, :directory)
+    trainPath = dataset+'/train'
+    testPath = dataset+'/test'
+
+    # Learn
+    puts "===== MAIN: learn based on training data ====="
+    exitIfFail('learn', runProgram(learner, 'learn', file(trainPath)))
+    puts
+
+    # Predict and evaluate on both training and test sets
+    [['Train', trainPath],
+     ['Test', testPath]].each { |tag,datashard|
+      puts "===== MAIN: predict/evaluate on #{tag.downcase} data ====="
+      evalInput = "eval#{tag}.in"
+      evalOutput = "eval#{tag}.out"
+      exitIfFail(['do'+tag, 'strip'],
+        runProgram(stripper, 'stripLabels', file(datashard), file(evalInput)))
+      exitIfFail(['do'+tag, 'predict'],
+        runProgram(learner, 'predict', file(evalInput), file(evalOutput)))
+      exitFail("On ./run predict <in> <out>, your program (#{learner}) did not write to <out>.") if not File.exists?(evalOutput)
+      exitIfFail(['do'+tag, 'evaluate'],
+        runProgram(evaluator, 'evaluate', file(datashard), file(evalOutput)))
+      puts
+    }
+end

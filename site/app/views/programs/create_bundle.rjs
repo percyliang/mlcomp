@@ -1,0 +1,1 @@
+page[:program_download_box].replace_html (@program_bundle_url ? (link_to "[download zip]", @program_bundle_url) : "Creating zip failed: #{@program_bundle_error}")

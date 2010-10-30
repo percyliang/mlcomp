@@ -1,0 +1,4 @@
+name: interactive-learning
+description: Main entry for interactive learning tasks (online learning), where is two phases.
+task: Main
+construct: interactivelearner:Program dataset:Dataset interactor:Program[Interact] evaluator:Program[Evaluate]

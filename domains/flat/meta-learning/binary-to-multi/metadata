@@ -1,0 +1,4 @@
+name: binary-to-multi
+description: Allows multiclass classification to be run on binary classification datasets (trivial reduction).
+task: BinaryClassification
+construct: multiclassLearner:Program[MulticlassClassification]

@@ -1,0 +1,57 @@
+name: BinaryClassification
+kind: supervised-learning
+taskDescription: |-
+  The goal of this task is to learn how to classify data points represented as real vectors into one of two classes (positive or negative).
+datasetDescription: |-
+  One file where each line corresponds to an example:
+  <pre>
+  <em>output</em> <em>featureIndex</em>:<em>featureValue</em> ... <em>featureIndex</em>:<em>featureValue</em> 
+  </pre>
+  where <em>featureIndex</em> is a positive integer, <em>featureValue</em> is a real number, and <em>output</em> &isin; {-1, +1}.
+  The feature indices must be sorted in increasing order.
+  For the test file, <em>output</em> is 0.
+  The predictions file contains a line for each test example:
+  <pre>
+  <em>predicted-output</em>
+  </pre>
+sampleDataset: binary-sample
+utilsProgram: binary-utils
+evaluatorProgram: classification-evaluator
+datasetFields:
+  - name: "#train"
+    type: integer
+    value: train/numExamples
+    description: Number of training examples.
+  - name: "#test"
+    type: integer
+    value: test/numExamples
+    description: Number of test examples.
+  - name: dim
+    type: integer
+    value: train/numDim
+    description: Number of input dimensions (features).
+runFields:
+  - name: Learn time
+    type: time
+    value: learn/time
+    description: Time to learn the model on training data.
+  - name: Train error
+    type: double
+    value: doTrain/evaluate/errorRate
+    description: Fraction of misclassified training examples.
+  - name: Predict train time
+    type: time
+    value: doTrain/predict/time
+    description: Time took to predict on the training set.
+  - name: Test error
+    type: double
+    value: doTest/evaluate/errorRate
+    description: Fraction of misclassified test examples.
+  - name: Predict test time
+    type: time
+    value: doTest/predict/time
+    description: Time to predict on the test set.
+errorFieldValue: doTest/evaluate/errorRate
+reductions:
+  - program: binary-to-multi
+    args: MulticlassClassification

@@ -1,0 +1,23 @@
+<table border="0">
+	<tr>
+		<th>&nbsp;</th>
+		<% @datasets.each do |dset| %>
+			<th><%= dset.name %></th>
+		<% end -%>
+	</tr>
+	<% @matrix.each_with_index do |prglst,pind| %>
+		<tr>
+			<td><%= @programs[pind].name %></td>
+			<% prglst.each_with_index do |runs,dind| %>
+				<td><%= if runs.empty? then 
+					 	"none - " + link_to_function("create?", 
+							"prgid_torun = #{@programs[pind].id}; 
+							dsetid_torun = #{@datasets[dind].id};
+							startRun();")
+					else 
+						display_runs_list runs 
+					end %></td>
+			<% end -%>
+		</tr>
+	<% end -%>
+</table>

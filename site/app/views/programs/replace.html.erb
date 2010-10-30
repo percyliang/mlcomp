@@ -1,0 +1,40 @@
+<% content_for :sidebar do %>
+  <div class="sidebar_header">
+  	Program Actions:
+  </div>
+  <div class="buttons" style="margin:10px">
+    <%= make_list "ul", [programShowButton, programEditButton, programDeleteButton,
+		programNewButton, programShowAllButton] %>
+  </div>
+<% end %>
+
+<h3>Re-uploading program <%= @program.name %>:</h3><br>
+<% form_tag({:action => 'replace'}, {:multipart => true}) do |f| %>
+
+  <b style="color:red">Warning: Replacing this program will delete all of its <%= @program.runs.size %> run(s)!</b>
+
+  <p>
+    Enter either a single <tt>run</tt> script or a zip file containing <tt>run</tt> and other files:
+    <input type="file" name="upload"/>
+    <%= submit_tag "Upload", :confirm => programDeleteConfirm %>
+  </p>	
+
+<!-- <b>NOTE:</b> Any <tt>metadata</tt> file will be ignored, and the current information will be used:<br>
+<div style="border:1px solid #aaa; margin:10px">
+	<table border="0" cellspacing="" cellpadding="5">
+		<tr><td><label>Name:</label></td>
+			<td><%= @program.name %></td>
+		</tr>
+		<tr><td><label>Description:</label></td>
+			<td><%= @program.description %></td>
+		</tr>
+		<tr><td><label>Task Type:</label></td>
+			<td><%= program_task_name @program %></td>
+		</tr>
+		<tr><td><label>User:</label></td>
+			<td><%= user_link @program.user %></td>
+		</tr>
+	</table>
+</div><br> -->
+
+<% end %>

@@ -1,0 +1,284 @@
+--- 
+- answer: |-
+    <p>Anyone who has worked with machine learning knows that it's a zoo.
+    There are a dazzling array of methods published at conferences each year,
+    leaving the practitioner, who just wants to choose the best method for his/her task, baffled.
+    </p>
+  tags: 
+  - section_general
+  question: What is the problem with machine learning these days?
+- answer: |-
+    <ul>
+      <li>You upload <b>programs</b> and/or <b>datasets</b>.</li>
+      <li>Programs are <b>run</b> on datasets.</li>
+      <li>Various performance metrics are reported on these runs.</li>
+    </ul>
+  tags: 
+  - section_general
+  - general_display/index
+  question: How does MLcomp work?
+- answer: |-
+    MLcomp aims to improve research in the following ways:
+    <ul>
+      <li><b>Transparency</b>: all metrics (error, running time, etc.) of
+      all programs and datasets are shown side-by-side for comparison.</li>
+      <li><b>Reproducibility</b>: one can download any program and dataset, which are
+      stored with their exact settings/formats, to verify results.</li>
+      <li><b>Collaboration</b>: anyone can upload programs and/or datasets which can be run on
+      and compared with existing programs and datasets.</li>
+    </ul>
+  tags: 
+  - section_general
+  - general_display/index
+  question: What is the goal of MLcomp?
+- answer: |-
+    <a href="http://groups.google.com/group/mlcomp">Yes.</a>
+  tags: 
+  - section_general
+  - general_display/index
+  question: Is there a forum or mailing list?
+- answer: |-
+    Intuitively, good programs have low error rates and good datasets distinguish programs.
+    Specifically, the rating of a dataset is related to the standard deviation of the error rates of programs run on that dataset.
+    For each dataset, a Gaussian is fit on the error rates of the programs, resulting a percentile (0 to 100) for each program.
+    The rating of a program is the average percentile across all the datasets on which it is run.
+    This is essentially a first cut at rating programs and we intend to improve it.
+    Suggestions are welcome.
+  tags: 
+  - section_general
+  - general_display/index
+  question: How are programs and datasets rated?
+- answer: |-
+    MLcomp serves two communities:
+    <ul>
+      <li><b>Machine learning researchers</b>: objectively evaluate and compare methods.</li>
+      <li><b>Practitioners</b>: quickly try out many different methods.</li>
+    </ul>
+
+    <p>For the machine learning researcher: you develop a fancy new algorithm.
+    Upload your program to MLcomp and run it on an array of different datasets
+    in the system that others have already uploaded.  You can then compare the results
+    to those of programs that others have uploaded.</p>
+
+    <p>For the practitioner: suppose you're working in computational biology and want
+    to know out which machine learning method works best on your
+    task.  Upload your dataset and run it on the many available
+    programs that have been developed by machine learning researchers,
+    and download the program that performs best.</p>
+  tags: 
+  - section_general
+  question: Who is MLcomp intended for?
+- answer: |-
+    If it is, it's a living and breathing repository.
+    The great thing about MLcomp is that all programs and datasets are in standard formats,
+    and hence can be run on each other, immediately producing results for all to see.
+  tags: 
+  - section_general
+  question: Isn't MLcomp just a repository for programs and datasets?
+- answer: Follow our <a href="/help/quickstart.html">QuickStart</a> to start uploading programs and datasets in minutes.
+  tags: 
+  - section_general
+  question: I work best by example.  How can I learn to use MLcomp?
+- answer: |-
+    A domain defines a particular machine learning task, for example,
+    binary classification or collaborative filtering.
+    Each domain is equipped with the following:
+    <ul>
+      <li>a particular dataset format,</li>
+      <li>a particular program interface, and</li>
+      <li>standard evaluation metrics.</li>
+    </ul>
+    For example, in the BinaryClassification domain, datasets are in SVMlight
+    format, and program interface must read these datasets and output binary
+    labels, and the evaluation metric is misclassification error rate.
+  tags: 
+  - section_domains
+  - general_display/index
+  question: What is a <em>domain</em>?
+- answer: See <a href="/faq/domains">this page</a> for a detailed description of all domains.
+  tags: 
+  - section_domains
+  question: What domains are supported?
+- answer: |-
+    We encourage you to contact the MLcomp team to create a new domain.  MLcomp
+    is built modularly, so it should be relatively easy to put in the desired
+    dataset formats, program interfaces, and evaluation scripts.
+  tags: 
+  - section_domains
+  question: I don't work in the standard domains (classification, regression, etc.).  How can I create a new domain for my specific problem?
+- answer: |-
+    Concretely, a program is an executable (called <b><tt>run</tt></b>) that conforms
+    to a particular <a href="/help/program_info.html"><em>program interface</em></a> determined by the domain.
+    Of course, the program can also include other files besides <tt>run</tt>.
+    Think of a program as a Java class implemented through the shell.
+  tags: 
+  - section_programs
+  - programs/new
+  question: How does my <em>program</em> interface with MLcomp?
+- answer: Currently, none.  In the future, a complex domain might be defined in terms of multiple task types and dataset formats.
+  tags: 
+  - section_domains
+  question: What's the difference between <em>domain</em>, <em>task type</em>, and <em>dataset format</em>?
+- answer: Basically any language.  Your program will be run on a <a href="/help/worker_info.html">standard Linux installation</a> with various software packages already installed.  Let us know if you need a particular library or package which doesn't exist.
+  tags: 
+  - section_programs
+  - programs/new
+  question: What language can I write my program in?
+- answer: |-
+    Either, as long as your <tt>run</tt> executable satisfies the program interface for the domain.
+    That being said, we recommend that you include source code.
+    MLcomp is designed to be collaborative, and this only works if your code is available to be downloaded by others.<p>
+  tags: 
+  - section_programs
+  - programs/new
+  question: Do I upload source code or compiled code?
+- answer: |-  
+    Include the C++ source files with your program package that you upload to MLcomp.
+    Write a <tt>run</tt> script (e.g., in Bash) which compiles the source code and invokes it.
+    Specifically, when we call <tt>./run construct</tt>, the C++ source files should be compiled.
+    See more information on the <a href="/help/program_info.html">program interface</a>.
+  tags: 
+  - section_programs
+  - programs/new
+  question: I don't use Linux.  How can I upload a program (in C++, for instance) that runs on Linux?
+- answer: |-
+    You have two options:
+    <ul>
+      <li>Implement your own hyperparameter tuning inside <tt>./run learn</tt> and MLcomp will treat it as a black box.</li>
+      <li>Implement <tt>./run setHyperparameter <em>x</em></tt> to store the hyperparameter <em>x</em>, which will be called before <tt>./run learn</tt>.
+      If hyperparameter tuning is chosen when a run is created,
+      MLcomp will use the training set to perform cross-validation on <em>x</em> &isin; { 0.01, 0.1, 1, 10, 100 } and use the best value.</li>
+    </ul>
+  tags: 
+  - section_programs
+  - programs/new
+  question: How is hyperparameter tuning handled?
+- answer: |-
+    Yes, this is done transparently through a one-versus-all reduction.
+  tags:
+  - section_programs
+  - programs/new
+  question: Can I run binary classification programs on multiclass datasets?
+- answer: We strongly encourage users to make their code available, but we provide the option to make it private. You are given the option of choosing whether to make it publicly downloadable or not at the time of upload. You can change this setting by clicking 'Edit Program' on the program's page.
+  tags: 
+  - section_programs
+  - programs/new
+  question: Is my program available for download by anyone?
+- answer: |-
+    Each dataset is identified with a domain-dependent <a href="/faq/domains">dataset format</a>.
+    In general, a dataset consists of multiple <b>shards</b>; for example, for some
+    tasks, the training, development, and test sets are standardized; these
+    would constitute three different shards. For supervised learning, typically
+    two shards are used: train and test. One can also upload a dataset with
+    just one shard called <b>raw</b>, which will be automatically split into training and test.
+  tags: 
+  - section_datasets
+  - datasets/new
+  question: What format are <em>datasets</em> in?
+- answer: |-
+    When a dataset is uploaded, it is processed by a <b>dataset processor</b>,
+    which validates the dataset according to the expected format,
+    computes statistics on the dataset, and splits the data if necessary.
+    Runs can only be executed on a dataset only after it has been processed.
+  tags: 
+  - section_datasets
+  - datasets/new
+  question: What happens after I upload a dataset?
+- answer: |-
+    You have two options:
+    <ul>
+      <li>Create two shards, called <b>train</b> and <b>test</b>.</li>
+      <li>Create one shard, called <b>raw</b>.  Upon upload, a dataset processor will automatically split
+      this shard into a train shard and a test shard containing 70% and 30% of the examples,
+    respectively.
+  tags: 
+  - section_datasets
+  - datasets/new
+  question: How is a dataset split for training and test?
+- answer: |-
+    By default, your dataset can be downloaded by anyone.
+    However, if there are licensing restrictions,
+    you can check the <em>restricted access</em> box for a dataset to prohibit downloads.  
+    However, note that others can use your data to test their algorithms.
+  tags: 
+  - section_datasets
+  - datasets/new
+  question: Is my dataset available for download by anyone?
+- answer: |-
+    Currently, datasets (when zipped) can be no larger than 200MB.
+  tags: 
+  - section_datasets
+  - datasets/new
+  question: How big can my dataset be?
+- answer: A run is the execution of a <em>program</em> on a <em>dataset</em>.  For example, for the binary classification domain, a run includes both training, testing, and evaluation.  Each run produces a log file and a set of statistics (time, memory, error rate, etc.), which can be viewed on the appropriate page of the run.
+  tags: 
+  - section_runs
+  - general_display/index
+  question: What is a <em>run</em>?
+- answer: |-
+    There are two ways:
+    <ol>
+      <li>Go to the page for a program.  At the bottom of the screen, choose the dataset to run on.</li>
+      <li>Go to the page for a dataset.  At the bottom of the screen, choose the program to run it on.</li>
+    </ol>
+  tags: 
+  - section_runs
+  - general_display/index
+  question: How do I create a <em>run</em>?
+- answer: |-
+    Go to the page for the run by clicking on a run ID.
+    This run page includes a log file of the run which will automatically updates while the run is in progress.
+    Results of the run are displayed once it finishes.
+  tags: 
+  - section_runs
+  question: How can I see the progress of a run?
+- answer: Any user with a (free) MLcomp account can start a run from any program to any compatible dataset. All run outputs are viewable by everyone.
+  tags: 
+  - section_runs
+  question: Who can create a run?
+- answer: |-
+    When you generate a run, you can set a time limit for the run (no more than 24 hours).  After that point, we will terminate the program.
+    Your program can use 1.5GB of memory.  <a href="/help/worker_info.html">More information here</a>.
+  tags: 
+  - section_runs
+  - runs/show
+  question: How much time, memory, disk space can my program use in a run?
+- answer: |-
+    To see your runs, go to the 'My Stuff' page. Click the ID of a run to see its page.
+  tags: 
+  - section_runs
+  question: I started a run, now where do I find it?
+- answer: |-
+    All runs are executed on Amazon's EC2 cloud-computing infrastructure on a standard Linux distribution.
+    <a href="/help/worker_info.html">More information here</a>.
+  tags: 
+  - section_runs
+  - runs/show
+  question: On what environment are runs executed?
+- answer: |-
+    Currently, MLcomp is supported by generous donations of computational credits from Michael Jordan at UC Berkeley.
+  tags: 
+  - section_runs
+  question: Who pays for the computing cost?
+- answer: |-
+    Go to the page for the run and look at the log file for signs of the responsible error.
+    You can also download the run and run it locally on your machine (a README file should
+    be included in the download which provides more information).
+  tags: 
+  - section_runs
+  - runs/show
+  question: My run is failing.  How do I debug it?
+- answer: |-
+    We said that a run was simply a program/dataset pair, but that's not the full story.
+    A run actually includes other helper programs such as the evaluation program and
+    various programs for reductions (e.g., one-versus-all, hyperparameter tuning).<p>
+    More formally, a run is a given by a <b>run specification</b>,
+    which can be found on the page for any run.
+    A run specification is a tree where each internal node represents a program
+    and its children represents the arguments to be passed into its constructor.
+    For example, the one-versus-all program takes your binary classification program
+    as a constructor argument and behaves like a multiclass classification program.
+  tags: 
+  - section_runs
+  - runs/show
+  question: Ok, what is a run, <em>really</em>?

@@ -1,0 +1,27 @@
+<% content_for :sidebar do %>
+  <div class="sidebar_header">
+  	Program Actions:
+  </div>
+  <div class="buttons">
+    <%= make_list "ul", [programNewButton] %>
+  </div>
+<% end %>
+
+<p>A <a href="/help/program_info.html">program</a> performs a machine learning task (e.g., regression, binary classification),
+taking a dataset as input.</p>
+
+<% if sessionTaskTypes[0] != '(all)' then %>
+<div class="blurb">
+<b><%= sessionTaskTypes[0] %>:</b>
+<%= Domain.get(sessionTaskTypes[0]).taskDescription %>
+</div>
+<% end %>
+
+<p>
+The table below shows everyone's programs that have been checked successfully in <%= sessionTaskTypeStr %>.
+To see only your programs, go to <%= link_to 'my stuff', :controller => 'my_stuff' %>.
+</p>
+
+<p><b>To create a run, first click on a program</b>.</p>
+
+<%= render :partial => 'table/many_table_show', :locals => { :tparams => @tparams } %>

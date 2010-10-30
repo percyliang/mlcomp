@@ -1,0 +1,19 @@
+<% content_for :sidebar do %>
+<div class="sidebar_header">
+	Run Actions:
+</div>
+<div class="buttons">
+</div>
+
+<% end %>
+
+<p>A run is the execution and evaluation of a program on a dataset.</p>
+
+<p><b>To create a run, first choose a <%= link_to 'program', programs_path %> or a <%= link_to 'dataset', datasets_path %>.</b></p>
+
+<p>Summary: <%= Run.countByStatus('ready') %> queued,
+<%= Run.countByStatus('running') %> running,
+<%= Run.countByStatus('done') %> successful,
+<%= Run.countByStatus('failed') %> failed</p>
+
+<%= render :partial => 'table/many_table_show', :locals => { :tparams => @tparams } %>

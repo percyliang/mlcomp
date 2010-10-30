@@ -1,0 +1,107 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+# This is online multiclass classification
+# Dataset in the form label featureIndex1:featureValue1 featureIndex2:featureValue2 ... 
+# Process: data without label -> predict -> correct label -> update
+
+#Not done yet
+def inspect(path)
+  exitFail("File doesn't exist: '#{path}'") if not File.exists?(path)
+  numExamples = 0
+  vectorDim = 0
+  k = 0
+  File.open(path, "r") do |file|
+    file.each_line do |line|
+      data = line.split(" ")
+      label = data.shift.to_i
+
+      k = label if k < label
+      
+      data.each do |d|
+        feature, value = d.split(":")
+        vectorDim = feature.to_i if vectorDim < feature.to_i
+      end
+
+      numExamples += 1
+    end
+  end
+  writeStatus({'numExamples' => numExamples,
+               'dim' => vectorDim,
+               'K' => k})
+  exitSuccess
+end
+
+def readLabels(datashard)
+  examples = []
+  File.open(datashard, "r") do |file|
+    file.each_line do |line|
+      data = line.split(" ")
+      label = data.shift.to_i
+      examples << label
+    end
+  end
+  examples
+end
+
+#Not done yet
+def interact(learner, datashard, outPath)
+  IO.popen("./" + learner, "r+") do |pipe|
+    File.open(datashard, "r") do |file|
+      File.open(outPath, "w") do |outFile|
+        file.each_line do |line|
+      
+          # For each line of the data file, we split the label from the features
+          data = line.split(" ")
+          label = data.shift.to_i
+          features = data.join(" ")
+      
+          # Now we send the features into the pipe
+          pipe.puts features
+      
+          # Now we request the label from the pipe
+          guess = pipe.gets
+
+          #Store guesses
+          outFile.puts guess
+
+          # Now we send the truth to the pipe
+          pipe.puts(label.to_s)
+
+        end
+      end
+    end
+  end
+end
+
+def evaluate(truePath, predPath)
+  trueExamples = readLabels(truePath)
+  predExamples = readLabels(predPath)
+  numErrors = 0
+  if trueExamples.size != predExamples.size
+    exitFail("Wrong number of examples output: true (#{truePath}) has #{trueExamples.size}, pred (#{predPath}) has #{predExamples.size}")
+  end
+  trueExamples.each_index { |i|
+    exitFail("Missing prediction for #{x}") unless predExamples[i]
+    numErrors += 1 if predExamples[i] != trueExamples[i]
+  }
+  numExamples = trueExamples.size
+  writeStatus(
+    'numErrors' => numErrors,
+    'numExamples' => numExamples,
+    'errorRate' => 1.0*numErrors/numExamples)
+end
+
+cmd = ARGV.shift
+case cmd
+  when 'inspect'
+    path, = parseArgs(:file)
+    inspect(path)
+  when 'interact' then
+    learner, dataPath, outPath = parseArgs(:file, :file, :nonexist)
+    interact(learner, dataPath, outPath)
+  when 'evaluate' then
+    dataPath, outPath = parseArgs(:file, :file)
+    evaluate(dataPath, outPath)
+end

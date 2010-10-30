@@ -1,0 +1,51 @@
+<% content_for :sidebar do %>
+  <div class="sidebar_header">
+  	Dataset Actions:
+  </div>
+  <div class="buttons">
+    <%= make_list "ul", [datasetShowButton, datasetReplaceButton, datasetDeleteButton, datasetNewButton, datasetShowAllButton] %>
+  </div>
+<% end %>
+
+<%= error_messages_for :dataset %>
+
+<% form_for(@dataset) do |f| %>
+  <p>
+    <b>Name</b> <i>(uniquely identifies the dataset)</i><br/>
+    <%= f.text_field :name %>
+  </p>
+
+  <p>
+    <b>Format</b> <i>(specifies which programs can be run on this dataset)</i><br />
+    <% if @dataset.proper %>
+      <%= @dataset.format %>
+    <% else %>
+      <%= collection_select(:dataset, :format, ["(select one)"]+Domain.names, :to_s, :to_s)%>
+    <% end %>
+  </p>
+
+  <p>
+    <b>Author</b> <i>(What organization or individual created this dataset?)</i><br />
+    <%= f.text_field :author %>
+  </p>
+
+  <p>
+  <b>URL</b> <i>(Does this dataset have a webpage?)</i><br/>
+    <%= f.text_field :url %>
+  </p>
+
+  <p>
+    <b>Restrict access?</b> <i>(Prevents others from downloading this dataset or any of its runs.)</i><br>
+    <%= f.check_box :restricted_access %>
+  </p>
+
+  <p>
+    <b>Description</b><br />
+    <%= f.text_area :description, :cols => 80, :rows => 5 %>
+  </p>
+
+
+  <p>
+    <%= f.submit "Save" %>
+  </p>
+<% end %>

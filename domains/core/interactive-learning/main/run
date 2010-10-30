@@ -1,0 +1,36 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+
+"""
+./run construct ../interactivelearner ../dataset ../interactor ../evaluator
+./run execute
+
+  ./interactor/run interact ../interactivelearner/run ../dataset/raw ../interactivelearner/predictions
+  ./evaluator/run evaluate ../dataset/raw ../interactivelearner/predictions
+"""
+# Two modes to online learning: interact and predict
+
+# Main entry point for interactive learning tasks (e.g., OnlineLearningMulticlass).
+# Takes in an interactivelearner, dataset, and other stuff and does all the running.
+cmd = ARGV.shift
+case cmd
+  when 'construct' then
+    saveArgs
+  when 'execute' then
+    interactivelearner, dataset, interactor, evaluator =
+      loadArgs(:directory, :directory, :directory, :directory)
+
+    learnerprogram = interactivelearner+"/run"
+    datashard = dataset+"/raw"
+    outPath = interactivelearner+"/predictions"
+
+    # Interact with learner
+    puts "===== MAIN: evaluate performance ====="
+    exitIfFail('interact', runProgram(interactor, 'interact', file(learnerprogram), file(datashard), file(outPath)))
+
+    # Evaluate performance
+    puts "===== MAIN: evaluate performance ====="
+    exitIfFail('evaluate', runProgram(evaluator, 'evaluate', file(datashard), file(outPath)))
+end

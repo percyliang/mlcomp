@@ -1,0 +1,3 @@
+name: sequence-conll-evaluator
+description: Evaluator for SequenceTagging.
+task: Evaluate

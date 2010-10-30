@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+# Babysit a process (if it dies, just restart it again).
+
+def now; Time.now.strftime("%D %H:%M:%S") end
+
+if ARGV.size == 0 || ARGV[0] !~ /^\d+$/
+  puts "Usage: <seconds to pause between executions> <cmd> ..."
+  exit 1
+end
+pause = ARGV.shift.to_i
+
+idx = 0
+while true
+  idx += 1
+  puts "#{now} === STARTING PROCESS ##{idx}: #{ARGV.join(' ')}"
+  system(*ARGV)
+  puts "#{now} === PROCESS ##{idx} TERMINATED: #{ARGV.join(' ')}"
+  puts
+  sleep pause
+end

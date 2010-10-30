@@ -1,0 +1,67 @@
+<%
+table_builders = create_table_builders
+finfos = []
+@table_params[:columns].each { |col|
+  if col.is_a?(Array) # Dynamic columns: [<class>, <argument>], e.g., ['SupervisedLearningRunInfo', 'BinaryClassification']
+    begin
+      infoClass = col[0].constantize
+      arg = col[1]
+    rescue Exception
+      raise "Unknown dynamic column: #{col}"
+    end
+    fieldSpec = infoClass.sortFieldSpec(arg)
+    if fieldSpec
+      fieldSpec.names.each_with_index { |name,i|
+        finfos << {
+          :dbfield => @table_params[:name]+".sort#{i}",
+          :display => lambda { |x|
+            fieldSpec.render(i, x.info.getSortField(i))
+            #(funcMap[fieldSpec.types[i].to_sym] || lambda{|x| x}).call(x.info.getSortField(i))
+          }, # assume info has same type as infoClass
+          :title => fieldSpec.descriptions[i],
+          :colname => fieldSpec.names[i]
+        }
+      }
+    end
+  else # Static column
+    raise "Unknown static column: #{col.to_sym}" unless table_builders[col.to_sym]
+    finfos << table_builders[col.to_sym]
+  end
+}
+
+table_headers = finfos.map { |finfo|
+	sorting_now = @table_params[:current_sort_col].to_s.downcase == finfo[:dbfield].to_s.downcase
+	sorting_now = (@table_params[:reverse_sort] ? h(" << ") : h(" >> ")) if sorting_now   
+	if finfo[:dbfield] == nil || finfo[:nosort]
+		"<span title='#{finfo[:title]}'>#{finfo[:colname].to_s}</span>"
+	else sort_link_helper2 finfo[:colname].to_s, finfo[:dbfield], @table_params[:name], finfo[:title], sorting_now
+	end
+}
+table_body = @items.map do |item| 
+  finfos.map { |finfo|
+	begin
+		finfo[:display].call(item).to_s
+	rescue Exception => e
+		Notification::notify_error(:subject => "error in _table_data.html.erb", 
+			:message => "The table_params that caused this was:\n#{@table_params.to_yaml}")
+		"(bug)"
+	end }
+end
+%>
+
+
+<%= make_nice_table table_headers, table_body %>
+
+<!-- <% if @table_params[:paginate] %>
+	<%= pagination_line @table_params, @items.length, @total %>
+<% end %> -->
+
+
+
+<div style="display:none" id="params_debug">
+	<ol>
+	<% @table_params.each_pair do |k,v| %>
+		<li><%= k.to_s + " => " + v.to_s %></li>
+	<% end %>
+	</ol>
+</div>

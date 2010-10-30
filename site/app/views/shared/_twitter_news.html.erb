@@ -1,0 +1,32 @@
+<!--<script src="http://widgets.twimg.com/j/2/widget.js"></script>-->
+<script src="javascripts/twitter.js"></script>
+<script>
+new TWTR.Widget({
+  version: 2,
+  type: 'profile',
+  rpp: 6,
+  interval: 6000,
+  width: 250,
+  height: 200,
+  theme: {
+    shell: {
+      background: '#f2f3eb',
+      color: '#555555'
+    },
+    tweets: {
+      background: '#f1efe3',
+      color: '#555555',
+      links: '#3f7e86'
+    }
+  },
+  features: {
+    scrollbar: true,
+    loop: false,
+    live: true,
+    hashtags: true,
+    timestamp: true,
+    avatars: false,
+    behavior: 'all'
+  }
+}).render().setUser('mlcomp_news').start();
+</script>

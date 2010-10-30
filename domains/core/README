@@ -1,0 +1,3 @@
+These are the top-level entry points for all runs depending on:
+ - the *kind* of domain 
+ - whether this is a dataset processing run or not.

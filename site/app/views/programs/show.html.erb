@@ -1,0 +1,100 @@
+<% content_for :sidebar do %>
+  <div class="sidebar_header">
+  	Program Actions:
+  </div>
+  <div class="buttons">
+	<% button_list = [] %>
+	<% button_list += [programEditButton, programReplaceButton, programDeleteButton] if ownsProgram %>
+    <% button_list += [programNewButton, programShowAllButton] %>
+	<%= make_list "ul", button_list %>
+  </div>
+<% end %>
+
+<% javascript_tag do %>
+	var prgid_torun = <%= @program.id.to_s %>;
+<% end %>
+
+<div id="prg_or_dset_display_box">
+	<div id="prg_dset_display_header">
+		<table border="0" cellspacing="0" cellpadding="5">
+			<tr><td> <%= midProgramIcon %></td><td><%= @program.name %></td></tr>
+		</table>
+    </div>
+	<div id="prg_or_dset_name">
+
+		<%= @program.description %>
+	</div>
+
+	<div id="prg_or_dset_info">
+		<table border="0" cellspacing="0" cellpadding="0">
+			<tr><td><label>Task:</label></td>
+				<td><%= program_task_name @program %></td>
+			</tr>
+			<tr><td><label>User:</label></td>
+				<td><%= user_link @program.user %></td>
+			</tr>
+			<tr><td><label>Size:</label></td>
+				<td><%= Format.space(@program.disk_size) %></td>
+			</tr>
+			<tr><td><label>Status:</label></td>
+				<td><%= programStatus(@program) %></td>
+			</tr>
+			<tr><td><label>Access:</label></td>
+				<td><%= @program.restricted_access ? "restricted" : "open" %></td>
+			</tr>
+
+		    <% if ownsProgram || (not @program.restricted_access) %>
+			<tr><td><label>Download:</label></td>
+				<td>
+					<span id="program_download_box">
+						<% if loggedin? %>
+					        <%= link_to_remote "[make zip file]",
+					          :before => "$('program_download_box').update('Packaging...')",
+					          :url => { :action => 'create_bundle', :id => @program.id } %>
+						<% else %>
+							Login required!
+						<% end -%>
+			      	</span>
+				</td>
+			</tr>
+		    <% end %>
+		</table>
+	</div>
+	<div style="clear:both"></div>
+	
+</div><br>
+
+<% show_hide_item "<b>Run this program on a dataset</b>" do %>
+	<br>
+	<%
+	if @program.process_status == "success" && (not @program.is_helper)
+	  runs_tparams = Dataset.create_tparams(:datasetFormats => Reduction.compatibleDatasetFormats(@program.task_type))
+	  runs_tparams.each { |key,tparams| 
+      tparams[:current_sort_col] = 'avg_stddev'
+      tparams[:reverse_sort] = true
+	    tparams[:columns] = [:dset_create_run, :dset_name, :dset_user, :dset_disk_size, :dset_avg_stddev, :dset_num_runs]
+      tparams[:title] = "Select a dataset"
+	  }
+	%>
+    <br>
+    <%= render :partial => 'table/many_table_show', :locals => { :tparams => runs_tparams } %>
+	<% else %>
+	Sorry, can't create runs until this program has been checked!
+  <% end %>
+<% end %>
+<br><br>
+
+<% if @program.process_status == "success" %>
+  <%= render :partial => 'table/many_table_show', :locals => { :tparams => @tparams } %>
+  <br><br>
+<% end %>
+<br><br>
+
+<% show_hide_item "Program contents" do %>
+	<br><%= display_dir_tree @program %>
+<% end -%>
+
+<br><br>
+
+<%= render :partial => 'shared/comments', :locals => {:object => @program} %>
+

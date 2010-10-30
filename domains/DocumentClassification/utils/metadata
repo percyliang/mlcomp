@@ -1,0 +1,3 @@
+name: document-classification-utils
+description: Inspects DocumentClassification datasets and evaluates DocumentClassification performance.
+task: Inspect Split Strip Evaluate

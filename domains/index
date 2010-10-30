@@ -1,0 +1,8 @@
+- BinaryClassification
+- MulticlassClassification
+- Regression
+- SequenceTagging
+- CollaborativeFiltering
+- DocumentClassification
+- WordSegmentation
+- OnlineLearningMulticlass

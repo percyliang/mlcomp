@@ -1,0 +1,75 @@
+<h2>Program Interface</h2>
+
+<p>A program must conform to the program interface of its domain.</p>
+
+The program can contain as many files as you'd like, so long as there is a
+<b><tt>run</tt></b> executable, which is the entry point.<p>
+
+There are two types of domains, <b>supervised-learning</b> and <b>performing</b>
+(read more about <a href="/faq/domains">domains</a>).
+The programs interfaces for each is described below<p>
+
+The program will be run in the current directory.
+Feel free to write to the current directory.<p>
+
+<hr>
+
+<h4>Supervised learning</h4>
+
+In supervised learning, there are two phases, <b>learn</b> and <b>predict</b>.
+
+Here's an example of how we invoke your program:
+<div class="blurb">
+<tt>
+./run construct<br>
+./run setHyperparameter 0.1 # (if automatic hyperparameter tuning is enabled)<br>
+./run learn path/to/training/datashard<br>
+./run predict path/to/test/datashard path/to/predictions<br>
+</tt>
+</div>
+
+Here's what the four options should do:
+<ul>
+  <li><tt>construct</tt>: allows your program to do any necessary initialization.
+    If your program consists of source code, this is where it should compile itself.
+  <li><tt>setHyperparameter <em>value</em></tt>:
+  set the hyperparameter to <em>value</em>,
+  which will take on values in { 0.01, 0.1, 1, 10, 100 }.
+  This command will be invoked only if you select automatic hyperparameter tuning.
+  Most likely, when this is called, your program will save <em>value</em> to disk and read it during <tt>learn</tt>.
+  </li>
+  <li><tt>learn</tt> <em>datashardPath</em>:
+  use examples in <em>datashardPath</em> for training.
+  Your program will probably serialize the learned model to disk (in the current directory is fine).
+  </li>
+  <li><tt>predict</tt> <em>datashardPath</em> <em>predictionsPath</em>:
+  output predictions of the learned model on examples from <em>datashardPath</em> to <em>predictionsPath</em>.
+  Your program will probably read in the learned model here.
+  </li>
+</ul>
+</p>
+
+<hr>
+<h4>Performing</h4>
+
+In performing, there is only one phase <b>perform</b>.
+This includes tasks like unsupervised learning and optimization.
+
+Here's an example of how we invoke your program:
+<div class="blurb">
+<tt>
+./run construct<br>
+./run perform path/to/raw/datashard path/to/output<br>
+</tt>
+</div>
+
+Here's what the two options should do:
+<ul>
+  <li><tt>construct</tt>: allows your program to do any necessary initialization.
+    If your program consists of source code, this is where it should compile itself.
+  <li><tt>perform</tt> <em>datashardPath</em> <em>outputPath</em>:
+    process the examples in <em>datashardPath</em> (e.g., clustering, segmentation, etc.),
+    and write the output to <em>outputPath</em>.
+    </li>
+</ul>
+</p>

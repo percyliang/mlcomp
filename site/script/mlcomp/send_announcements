@@ -1,0 +1,2 @@
+#!/usr/bin/env ruby
+system(File.dirname($0)+'/../runner', File.dirname($0)+"/announcement_script.rb")

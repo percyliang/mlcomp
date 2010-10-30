@@ -1,0 +1,84 @@
+name: SequenceTagging
+kind: supervised-learning
+taskDescription: |-
+  In this task, the input is a sequence (e.g., a sentence) and the output is a tag label for each position of the sequence (e.g., part-of-speech tags for each word in the sentence).
+  The key part of this problem is that there is are dependencies between the various labels.
+  This is the canonical structured prediction task.
+datasetDescription: |-
+  The file format is the same as the one from the CoNLL shared task.
+  In the data file, each line corresponds to a position of a sequence and empty lines denote the end of one sequence and the start of another.
+  Each line looks like this (a sequence of input feature columns followed by one output):
+  <pre>
+  <em>input</em> ... <em>input</em> <em>output</em>
+  </pre>
+  where the input and output are strings.
+  For example, for named-entity recognition:
+  <pre>
+  France NNP B-LOC
+  </pre>
+  If labels include B-X, I-X, then this is treated as a segmentation task
+  where a sequence of B-X I-X ... I-X denotes a segment labeled as X.
+  For these tasks (e.g., named-entity recognition), F1 is an appropriate evaluation metric.
+  For the test file, <em>output</em> is "-".
+  The predictions file contains lines parallel to the input like the following:
+  <pre>
+  <em>predicted-output</em>
+  </pre>
+sampleDataset: sequence-conll-sample
+utilsProgram: sequence-conll-utils
+evaluatorProgram: sequence-conll-evaluator
+datasetFields:
+  - name: "#trainEx"
+    type: integer
+    value: train/numExamples
+    description: Number of training examples.
+  - name: "#testEx"
+    type: integer
+    value: test/numExamples
+    description: Number of test examples.
+  - name: "#trainTok"
+    type: integer
+    value: train/numTokens
+    description: Number of training tokens.
+  - name: "#testTok"
+    type: integer
+    value: test/numTokens
+    description: Number of test tokens.
+  - name: "#featureCols"
+    type: integer
+    value: train/numFeatureColumns
+    description: Number of feature columns.
+  - name: "#labels"
+    type: integer
+    value: train/numLabels
+    description: Number of output labels.
+runFields:
+  - name: Learn time
+    type: time
+    value: learn/time
+    description: Time to learn the model on training data.
+  - name: Train acc.
+    type: double
+    value: doTrain/evaluate/accuracy
+    description: Tag accuracy (fraction of correct tag labels).
+  - name: Train F1
+    type: double
+    value: doTrain/evaluate/f1
+    description: F1 score (harmonic mean of precision and recall).
+  - name: Predict train time
+    type: time
+    value: doTrain/predict/time
+    description: Time took to predict on the training set.
+  - name: Test acc.
+    type: double
+    value: doTest/evaluate/accuracy
+    description: Tag accuracy (fraction of correct tag labels).
+  - name: Test F1
+    type: double
+    value: doTest/evaluate/f1
+    description: F1 score (harmonic mean of precision and recall).
+  - name: Predict test time
+    type: time
+    value: doTest/predict/time
+    description: Time to predict on the test set.
+errorFieldValue: doTest/evaluate/errorRate

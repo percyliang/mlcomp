@@ -1,0 +1,3 @@
+name: document-classification-sample
+description: Sample dataset for DocumentClassification consisting of two document classes - one about cars and the other about trees.
+format: DocumentClassification

@@ -1,0 +1,3 @@
+name: sequence-conll-utils
+description: Validates and inspects SequenceTagging (CoNLL Shared Task) datasets.
+task: Inspect Split Strip

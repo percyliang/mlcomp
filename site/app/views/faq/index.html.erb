@@ -1,0 +1,90 @@
+<h2 id="mlcomp_frequently_asked_questions">Help and frequently asked questions</h2>
+<%= helpIcon %>
+
+<% if isadmin %>
+	<div id="faq_editor">
+		<% form_tag({:action => "save_faq"}, {:id => 'faq_data_form'}) do %>
+		<%= hidden_field_tag 'faq_data', nil, :id => 'faq_data_field' %>
+		<span class="buttons">
+			<%= link_to_function "New Question", update_page { |page| 
+				page.insert_html :top, 'sortable_list', :partial => 'faq_edit_question', :locals => {:visible => true}
+				page << 'registerFirstDelete();'
+				page << 'makeSortable()'
+				} %><br>
+			<%= link_to_function "Save", "gatherData()" %>
+		</span>
+		<% end %>
+		
+		<% form_tag do %>
+		
+		<ul id="sortable_list">
+		<% @questions.each_with_index do |q,ind| %>
+			<%= render :partial => 'faq_edit_question', :locals => {:q => q} %>
+		<% end -%>	
+		</ul>
+		
+		
+		<% end -%>
+
+	</div>
+	
+
+	
+	<script type="text/javascript" charset="utf-8">
+	function makeSortable() {
+		Sortable.create("sortable_list",{handles:$$('#sortable_list li a.move_button')});
+	}
+	function gatherData() {
+		var dataArray = $$('#sortable_list li').map( 
+			function(elt) {
+				var qfield = elt.select('input[class=question_field]').first().getValue();
+				var afield = elt.select('textarea[class=answer_field]').first().getValue();
+				var tfield = elt.select('input[class=tags_field]').first().getValue();
+				return {question: qfield, answer: afield, tags: tfield};
+			}
+		)
+		Form.Element.setValue("faq_data_field",dataArray.toJSON());
+		$('faq_data_form').submit();
+	};
+	makeSortable();
+	
+	</script>
+	
+	<script type="text/javascript" charset="utf-8">
+		function registerDeleteButtons() {
+			$$('#sortable_list li').each(function(elt) {
+				elt.select('a.delete_button').first().observe("click",function(ev){
+					if ($(elt) && confirm("Are you sure you want to delete this question?"))	elt.remove();
+				})
+			})
+		}
+		function registerFirstDelete() {
+			var elt = $$('#sortable_list li').first();
+			elt.select('a.delete_button').first().observe("click",function(ev){
+				if ($(elt) && confirm("Are you sure you want to delete this question?"))	elt.remove();
+			})
+		}
+		registerDeleteButtons();
+	</script>
+	
+<% else %>
+<div style="text-align:right">
+	<%= link_to_function "(show all answers)", "$$('div.faq_answer').each(function(elt){elt.show();})", :style => 'text-align:right' %>
+</div>
+
+<% @sections.each do |sec| %>
+
+<div class="faq_section_header">
+	<%= sec.capitalize %>
+</div>
+
+<div class="faq_section">
+	<%= render :partial => 'question_list', :locals => {
+		:questions => @questions.select { |x| x['tags'].index('section_' + sec)}
+		} %>
+</div>
+
+<% end -%>
+	
+<% end -%>
+

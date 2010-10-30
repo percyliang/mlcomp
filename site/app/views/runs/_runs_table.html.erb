@@ -1,0 +1,29 @@
+<% shortened = (defined? shorten) && shorten %>
+<% columns = shortened ? [0,1,8] : (0..8).to_a  %>
+<% title = local_assigns[:title] %>
+<% headers = %w(RunID Program Dataset Status LearnTime TrainTime TestTime TrainError TestError) %>
+
+<% headers = columns.map { |ind| headers[ind] } %>
+
+<% body = [] %>
+
+<% if runs 
+	for run in runs 
+		if run.info.class == SupervisedLearningRunInfo then
+			row_data = []
+			row_data << (link_to run.id, run_path(run))
+			row_data << (run.info.learner ? program_link(run.info.learner) : "(deleted)")
+			row_data << (run.info.dataset ? dataset_link(run.info.dataset) : "(deleted)")
+			row_data << (run.status && run.status.status)
+			row_data << Format.time(run.info.learnTime)
+			row_data << Format.time(run.info.predictTrainTime)
+			row_data << Format.time(run.info.predictTestTime)
+			row_data << Format.double(run.info.predictTrainError)
+			row_data << Format.double(run.info.predictTestError)
+			body << (columns.map {|ind| row_data[ind]})
+		end
+	end
+end
+%>
+
+<%= make_nice_table headers, body, title %>

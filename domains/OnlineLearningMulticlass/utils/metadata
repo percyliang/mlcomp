@@ -1,0 +1,3 @@
+name: online-multiclass-utils
+description: Inspects OnlineLearningMulticlass datasets and evaluates OnlineLearningMulticlass performance.
+task: Inspect Interact Evaluate

@@ -1,0 +1,73 @@
+
+
+
+
+
+<div>
+	<h4> User: <%= @user.fullname %></h4>
+	<p>
+	  <b>Username:</b>
+	  <%=h @user.username %>
+	</p>
+	<p>
+		<b>Affiliation:</b>
+	  <%=h @user.affiliation || "n/a" %>
+	</p>
+  <% if isadmin %>
+    <p>
+      <b>Email:</b>
+      <%=h @user.email || "n/a" %>
+    </p>
+  <% end %>
+	<p>
+	  <b>User since:</b>
+	  <%=h @user.created_at.to_date %>
+	</p>
+	<p>
+	  <b># programs:</b>
+	  <%=h @user.programs.length %>
+	</p>
+	<p>
+	  <b># datasets:</b>
+	  <%=h @user.datasets.length %>
+	</p>
+
+	<p>
+	  <b># runs:</b>
+	  <%=h @user.runs.length %>
+	</p><br><br>
+	 
+	<% if true %>
+	<% @program_tparams = Program.create_tparams(:user => @user,
+	                                            :taskTypes => sessionTaskTypes,
+	                                            :showHelpers => isadmin, :showUnprocessed => isadmin,
+                                              :default_tparams => {:title => "Programs (#{sessionTaskTypeSimpleStr})"})
+
+	  @dataset_tparams = Dataset.create_tparams(:user => @user,
+	                                            :datasetFormats => sessionDatasetFormats, :showUnprocessed => isadmin,
+                                              :default_tparams => {:title => "Datasets (#{sessionDatasetFormatSimpleStr})"})
+
+	  @run_tparams = Run.create_tparams(:user => @user,
+	                                    :datasetFormats => sessionDatasetFormats, :showHelpers => isadmin,
+                                      :default_tparams => {:title => "Runs (#{sessionDatasetFormatSimpleStr})"}) %>
+	
+	
+		<%= render :partial => 'table/many_table_show', :locals => { :tparams => @program_tparams } %>
+
+
+		<br><br>
+
+		<%= render :partial => 'table/many_table_show', :locals => { :tparams => @dataset_tparams } %>
+		
+		<br><br>
+
+
+		<%= render :partial => 'table/many_table_show', :locals => { :tparams => @run_tparams } %>
+		<br/>
+
+	
+	<% end %>
+
+</div>
+
+

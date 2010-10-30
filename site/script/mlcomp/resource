@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+# Command-line utility to add programs, datasets, manipulate the database
+exec(File.dirname($0)+'/../runner', 'require "lib_autoloader"; ResourceManager.main('+ARGV.map{|x|"'"+x+"'"}.join(',')+')')

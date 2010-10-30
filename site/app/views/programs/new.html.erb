@@ -1,0 +1,33 @@
+<% content_for :sidebar do %>
+  <div class="sidebar_header">
+  	Program Actions:
+  </div>
+  <div class="buttons">
+    <%= make_list "ul", [programShowAllButton] %>
+  </div>
+<% end %>
+
+<%= error_messages_for :program %>
+
+<h3>Upload Program</h3>
+<hr/>
+
+<% form_for(@program, :html => {:multipart => true}) do |f| %>
+
+  <p>Your program must contain an executable which conforms to a standard <a href="/help/program_info.html" target="_blank">program interface</a>.
+  For an example of how this interface is implemented, download any existing <%= link_to 'program', :controller => 'programs' %>.
+  </p>
+
+  You can upload one of the following:
+  <ol>
+    <li>A single executable script <b><tt>run</tt></b>.</li>
+    <li>A zip file containing a file called <b><tt>run</tt></b> and other files.
+    This zip file can optionally contain a <b><tt>metadata</tt></b>.</li>
+  </ol>
+
+  <p>
+    <input type="file" name="upload" />
+    <%= f.submit "Upload" %>
+  </p>
+
+<% end %>

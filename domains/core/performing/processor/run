@@ -1,0 +1,15 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+# Process a performing dataset.  Just inspect it (no need to split).
+cmd = ARGV.shift
+case cmd
+  when 'construct'
+    saveArgs
+  when 'execute'
+    dataset, inspector, = loadArgs(:directory, :directory)
+    rawDatashard = "#{dataset}/raw"
+    exitIfFail('raw', runProgram(inspector, 'inspect', file(rawDatashard)), 'Inspecting raw datashard.')
+    exitSuccess
+end

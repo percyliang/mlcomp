@@ -1,0 +1,68 @@
+name: DocumentClassification
+kind: supervised-learning
+taskDescription: |-
+  The goal of this task is to learn how to classify text documents as one of K classes.
+datasetDescription: |-
+  The datashard is a directory consisting of one directory for each class,
+  which in turn contains one file for each document.
+  All the file names must be distinct.
+  An example of the directory layout inside the datashard:
+  <pre>
+  label1/doc1
+  label1/doc2
+  label2/doc3
+  ...
+  </pre>
+  The test datashard consists of hte following layout:
+  <pre>
+  unlabeled/doc1
+  unlabeled/doc2
+  unlabeled/doc3
+  ...
+  </pre>
+  Predictions should be written to a directory with the following structure,
+  where each file can be empty (only the name matters).
+  <pre>
+  label1/doc1
+  label1/doc2
+  label2/doc3
+  ...
+  </pre>
+sampleDataset: document-classification-sample
+utilsProgram: document-classification-utils
+evaluatorProgram: document-classification-utils
+datasetFields:
+  - name: "#train"
+    type: integer
+    value: train/numExamples
+    description: Number of training examples.
+  - name: "#test"
+    type: integer
+    value: test/numExamples
+    description: Number of test examples.
+  - name: "#labels"
+    type: integer
+    value: train/numLabels
+    description: Number of output classes (labels).
+runFields:
+  - name: Learn time
+    type: time
+    value: learn/time
+    description: Time to learn the model on training data.
+  - name: Train error
+    type: double
+    value: doTrain/evaluate/errorRate
+    description: Fraction of misclassified training examples.
+  - name: Predict train time
+    type: time
+    value: doTrain/predict/time
+    description: Time took to predict on the training set.
+  - name: Test error
+    type: double
+    value: doTest/evaluate/errorRate
+    description: Fraction of misclassified test examples.
+  - name: Predict test time
+    type: time
+    value: doTest/predict/time
+    description: Time to predict on the test set.
+errorFieldValue: doTest/evaluate/errorRate

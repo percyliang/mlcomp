@@ -1,0 +1,29 @@
+<% q ||= {} %>
+<%  %>
+<% qid = rand 1000000 %>
+<li class="faq_edit_item">
+	<% unless local_assigns[:visible] %>
+	<div id="view_<%= qid %>">
+		<%= render :partial => 'question', :object => q %> 
+		<%= link_to_function "edit", "$('edit_#{qid}').show(); $('view_#{qid}').hide();" %>
+	</div>
+	<% end -%>
+	
+	<div <% unless local_assigns[:visible] %> id="edit_<%= qid %>" style="display:none" <% end -%>>
+		<div style="float:left">
+			<span class="buttons">
+				<%= link_to "Move", "#", :class => "move_button" %><br>
+				<%= link_to "Delete", "#", :class => "delete_button" %>
+			</span>
+		</div>
+		<div style="float:left">
+			<%= text_field_tag nil, q['question'] || "Question title", :size => 50, :class => 'question_field' %><br>
+			<%= text_field_tag nil, q['tags'] ? q['tags'].join(", ") : 'section_general', :size => 70, :class => 'tags_field' %><br>
+			<%= text_area_tag nil, q['answer'] || "Answer text", :rows => 4, :cols => 50, :class => 'answer_field' %>
+		</div>
+
+		<div style="clear:both">
+		
+		</div>	
+	</div>
+</li>

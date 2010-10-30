@@ -1,0 +1,51 @@
+<% @items,@total,@table_params = TableQuery.lookup(table_params) %>
+<div class="sorted_table_container">
+	
+	<% if table_params[:title] %>
+		<span id="<%= table_params[:name] %>_header" class="sorted_table_header">
+			<%= table_params[:title] %></span>
+	<% end -%>
+	
+	<% query_field_name = "query_" + table_params[:name] %>
+  <%= dropdown %>
+	<% if table_params[:show_footer] %>
+	
+	<span id="<%= table_params[:name] %>_pagination" class="pagination"><%= pagination_line(@table_params, @items.length, @total) %></span>
+	
+	<span class="refresh_span"><%= link_to_function icon('action_refresh_blue'), "updateTable('#{table_params[:name]}')", :class => 'icon'%></span>
+	
+	<span class="filter_box_span">
+		<label for="item_name">Filter:</label>
+      	<%= text_field_tag(query_field_name, params['query'], :size => 10) %></span>
+  	<% end %>
+
+	<%= javascript_tag "setTableData('#{table_params[:name]}','#{table_params.to_json}')" %>
+	
+	<!-- <% unless table_params[:title].nil? %>
+		<h6><%= local_assigns[:title] %></h6>	
+	<% end %> -->
+
+	<div style="width:<%= table_params[:width] || "100%" %>; clear:both; margin-top:3px"  >
+		<div id='<%= table_params[:name] %>' style="margin-top:0px" class="scrollable_box">
+			<%= render :partial => 'table/table_data' %>
+		</div>
+	</div>
+	
+
+</div>
+
+<%= observe_field query_field_name, :frequency => 1,
+	:before  => "Element.show('spinner')",
+	:success => "Element.hide('spinner')",
+	:function => "updateTableElt('#{table_params[:name]}', 'filter_string', value);
+		updateTableElt('#{table_params[:name]}', 'pagination_page', 0);
+		updateTable('#{table_params[:name]}');"
+%>
+
+<%# observe_field 'format', :frequency => 2,
+	:update  => table_id,
+	:before  => "Element.show('spinner')",
+	:success => "Element.hide('spinner')",
+	:url     => url,
+	:with    => 'filter_group_value'
+%>

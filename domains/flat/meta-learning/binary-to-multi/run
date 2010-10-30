@@ -1,0 +1,50 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+# Trivial reduction.
+cmd = ARGV.shift
+case cmd
+  when 'construct' then
+    saveArgs
+  when 'learn' then
+    multiclassLearner, = loadArgs(:program)
+    datashard, = parseArgs(:file)
+
+    myDatashard = "data"
+
+    # Convert binary to multiclass
+    out = open(myDatashard, "w")
+    IO.foreachClean(datashard) { |line|
+      y, x = line.split(/ /, 2)
+      y = y.to_i
+      if y == 1 then y = 1
+      elsif y == -1 then y = 2
+      else exitFail("Invalid label: #{y}, wanted -1 or +1")
+      end
+      out.puts "#{y} #{x}"
+    }
+    out.close
+
+    exitIfFail("learn", runProgram(multiclassLearner, 'learn', file(myDatashard)))
+
+  when 'predict' then
+    multiclassLearner, = loadArgs(:program)
+    inPath, outPath = parseArgs(:file, :nonexist)
+
+    myOutPath = outPath+".multiclass-output"
+    exitIfFail("predict", runProgram(multiclassLearner, 'predict', file(inPath), file(myOutPath)))
+
+    # Convert multiclass to binary
+    out = open(outPath, "w")
+    IO.foreachClean(myOutPath) { |line|
+      y, x = line.split(/ /, 2)
+      y = y.to_i
+      if y == 1 then y = 1
+      elsif y == 2 then y = -1
+      else exitFail("Invalid label: #{y}, wanted 1 or 2")
+      end
+      out.puts "#{y} #{x}"
+    }
+    out.close
+end

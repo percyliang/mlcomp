@@ -1,0 +1,6 @@
+<div style="font-size:1.2em">
+</div>
+<div>
+	<%= link_to_function("See run progress", "window.opener.window.location.href = '" +  url_for(:controller => 'runs', :action => 'show', :id => @run.id) + "'; window.close();") %><br>
+	<span style="font-size:0.8em">This window will close in <span id="time_to_close" style="font-size:1.4em">5</span> seconds.</span>
+</div>

@@ -1,0 +1,74 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+def inspect(path)
+  exitFail("File doesn't exist: '#{path}'") if not File.exists?(path)
+  numWords = 0
+  numSentences = 0
+  IO.foreach(path) { |line|
+    numWords += line.split.size
+    numSentences += 1
+  }
+  writeStatus({'numSentences' => numSentences,
+               'numWords' => numWords})
+  exitSuccess
+end
+
+def stripLabels(inPath, outPath)
+  out = open(outPath, 'w')
+  IO.foreach(inPath) { |line|
+    out.puts line.gsub(/ /, '')
+  }
+  out.close
+end
+
+def evaluate(truePath, predPath)
+  numCorrect = 0
+  numPred = 0
+  numTrue = 0
+  def extract(l) # l is a list of words; return set of position pairs where those words appear in a sentence
+    i = 0
+    h = {}
+    l.each { |x|
+      h[[i, i+x.size]] = true
+      i += x.size
+    }
+    h
+  end
+  IO.foreach2(truePath, predPath) { |t,p|
+    exitFail("Your predictions #{predPath} do not have the right number of lines compared to #{truePath}") if t == nil || p == nil
+    ts = t.split
+    ps = p.split
+    exitFail("Sentences don't match: '#{ts.join('')}' (true) versus '#{ps.join('')}' (pred)") if ts.join('') != ps.join('')
+    th = extract(ts)
+    ph = extract(ps)
+    numTrue += th.size
+    numPred += ph.size
+    th.keys.each { |a| numCorrect += 1 if ph[a] }
+  }
+  precision = 1.0 * numCorrect / numPred
+  recall = 1.0 * numCorrect / numTrue
+  f1 = 2 * precision * recall / (precision + recall)
+  writeStatus(
+    'numCorrect' => numCorrect,
+    'numPred' => numPred,
+    'numTrue' => numTrue,
+    'precision' => precision,
+    'recall' => recall,
+    'f1' => f1,
+    'errorRate' => 1-f1)
+end
+
+cmd = ARGV.shift
+case cmd
+  when 'inspect'
+    path, = parseArgs(:file)
+    inspect(path)
+  when 'stripLabels'
+    inPath, outPath = parseArgs(:file, :nonexist)
+    stripLabels(inPath, outPath)
+  when 'evaluate' then
+    truePath, predPath = parseArgs(:file, :file)
+    evaluate(truePath, predPath)
+end

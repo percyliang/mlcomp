@@ -1,0 +1,148 @@
+<% content_for :sidebar do %>
+  <div class="sidebar_header">
+  	Dataset Actions:
+  </div>
+  <div class="buttons">
+    <%= make_list "ul", [datasetShowAllButton] %>
+  </div>
+<% end %>
+
+<%= error_messages_for :dataset %>
+
+<h3>Upload Dataset</h3>
+<hr/>
+
+<h4>What type of data do you have?</h4>
+
+<% form_for(@dataset, :html => {:multipart => true, :id => 'dataset_upload'}) do |f| %>
+
+<table border="0" cellspacing="0" cellpadding="2" id="format_selection_box">
+	<tr>
+	<% Domain.names.each do |name| %>
+	<% datasetFormat = Domain.get(name).datasetFormat %>
+		<td><%= radio_button_tag('dataset_format', datasetFormat, sessionDatasetFormats.first == name) %></td>
+		<td><%= datasetFormat %></td>
+		<%= cycle("", "</tr><tr>") %>
+	<% end -%>
+	</tr>
+</table>
+<br>
+
+<div id="format_explanations">
+	
+	<div format_name="none" class="format_explanation_box" <% unless sessionDatasetFormats.first == '(all)' %> style="display:none" <% end %>>
+    <!--<h4>Choose Format Above For Explanation</h4>-->
+	</div>
+	
+<% Domain.names.each do |name| %>
+<% dom = Domain.get(name)%>
+<div format_name="<%= dom.datasetFormat %>" <%= sessionDatasetFormats.first != dom.datasetFormat ? "style='display:none'" : '' %> class="format_explanation_box">
+	<div class="format_explanation_body">
+		<strong>Dataset format description:</strong><br>
+		<%= dom.datasetDescription %><br><br>
+		<% dataset = false  %>
+		<% begin 
+			dataset = dom.sampleDataset 
+		rescue Exception => e
+		end -%>
+		<% if dataset %>
+			<strong>Sample dataset:</strong><br>
+			<pre><%= (dataset.contents) ? dataset.contents : "(no sample dataset available)" %></pre>
+		<% end -%>
+	</div>
+</div>
+
+<% end -%>
+</div>
+
+<hr/>
+
+<h4>How do you want to give us your data?</h4>
+
+<table border="0" cellspacing="5" cellpadding="5">
+	<tr>
+		<td><%= radio_button_tag('upload_format', 'copy_paste') %>
+			<b>Copy/paste</b></td>
+		<td> I have a small dataset, I can copy it into a form</td>
+	</tr>	
+	<tr>
+		<td><%= radio_button_tag('upload_format', 'single_file') %>
+			<b>Upload single file</b></td>
+		<td>I have a single dataset file, I'll let MLcomp split the data for training and testing</td>
+	</tr>
+
+	<tr>
+		<td><%= radio_button_tag('upload_format', 'zip') %>
+			<b>Upload split data</b></td>
+		<td>I have my data already split into train/test</td>
+	</tr>
+</table>
+	
+<div id="upload_options">
+	<div id="copy_paste_box" style="display:none" class="format_explanation_box">
+		<h4>Paste dataset here:</h4>
+		<%= text_area_tag 'copy_paste_dataset', "", :rows => 20, :cols => 100  %><br>
+		<%= f.submit "Upload" %>
+	</div>
+	<div id="single_file_box" style="display:none" class="format_explanation_box">
+		<h4>Upload a raw dataset</h4>
+		Upload a single file conforming to the format above.<br>
+	    <input type="file" name="upload_raw_single" />
+		<%= f.submit "Upload" %>
+	</div>
+	<div id="zip_box" style="display:none" class="format_explanation_box">
+		<h4>Upload a zip file with metadata</h4>
+		You should upload a zip file, say <strong>filename.zip</strong>, with the following contents:
+		<ul class='maketree'>
+			<li>
+				<strong>filename.zip</strong>
+				<ul>
+					<li>
+						<strong>train</strong>: The training datashard, conforming to the format above.
+					</li>
+					<li>
+						<strong>test</strong>: The test datashard, conforming to the format above.
+					</li>
+					<li>
+						<strong>metadata</strong>: Provides additional information such as a description, the dataset's author, etc. The format is as follows:
+<pre style="font-size:0.8em; padding:10px">
+name: unique-dataset-name-17
+format: <%= sessionDatasetFormats.first %>
+description: Handwritten digit recognition.  
+source: University of Pandora              # (optional)
+author: Joe Schmoe &lt;jschmoe@schmoe.com&gt;    # (optional)
+url: http://my.url.com/dataset             # (optional)          
+</pre>
+
+					</li>
+				</ul>
+			</li>
+		</ul>
+		
+		<p>You will be prompted for additional information if you do not upload a zip file with a <tt>metadata</tt> file, or if some metadata is missing.</p>
+		<input type="file" name="upload_raw_zip" />
+		<%= f.submit "Upload" %>
+	</div>
+	
+</div>
+<br><br><br><br>
+<% end %>
+<%= observe_form 'dataset_upload',
+ 	:frequency => 0,
+	:function => 'var dsetFormat = $RF("dataset_upload","dataset_format");
+		$$("#format_explanations div[format_name]").each(
+			function (elt) {
+				if (elt.readAttribute("format_name") == dsetFormat) {
+					elt.show();
+				} else { elt.hide();}
+			}
+		);
+		var uploadType = $RF("dataset_upload","upload_format");
+		$$("#upload_options div").each(
+			function (elt) {
+				if (elt.readAttribute("id") == (uploadType + "_box")) {
+					elt.show();
+				} else { elt.hide();}
+			}
+		);
+		'%>

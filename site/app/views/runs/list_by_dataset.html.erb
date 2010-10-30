@@ -1,0 +1,7 @@
+<h1>Listing runs for <%= link_to(@dataset.name, @dataset) %></h1>
+
+<%= render :partial => "runs_table" %>
+
+<br />
+
+<%= link_to 'New run', new_run_path %>

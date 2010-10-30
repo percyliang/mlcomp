@@ -1,0 +1,15 @@
+<% content_for :sidebar do %>
+  <div class="sidebar_header">
+  	Worker Actions:
+  </div>
+  <div class="buttons" style="margin:10px">
+	<% btn_list = [] %>
+  <% n = Worker.countInactive %>
+  <% btn_list << nice_button("Remove #{n} inactive workers", :action => :prune, :id => :none) if n > 0 %>
+	<%= make_list "ul", btn_list %>
+  </div>
+<% end %>
+
+<p>A <a href="/help/index.html#workers">worker</a> performs a run.</p>
+
+<%= render :partial => 'table/many_table_show', :locals => { :tparams => @tparams } %>

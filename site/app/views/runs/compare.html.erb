@@ -1,0 +1,80 @@
+<script type="text/javascript" charset="utf-8">
+	function addItemToList(pname,id,list_name,attname) {
+		if ($(list_name).childElements().size() < 5) {
+				var li = new Element('li');
+				liid = li.identify();
+				var dellnk = new Element('a', {href: '#'}).update("X");	
+				dellnk.observe('click', function (event) {
+					event.element().up().remove();
+				});
+				li.writeAttribute(attname, id);
+				li.insert(dellnk);
+				li.insert(pname);
+				$(list_name).insert(li);
+		}
+	}
+	function addDatasetToList(pname, pid) {	addItemToList(pname,pid,'datasets_list','dsetid');};
+	function addProgramToList(pname, pid) { addItemToList(pname,pid,'programs_list','prgid');};
+	function gatherAtts(eltid,attname) {
+		return $(eltid).childElements().map( function(elt) {
+			return elt.readAttribute(attname);
+		})
+	}
+</script>
+
+<% content_for :sidebar do %>
+
+<h5>Programs To Compare</h5>
+<ul id="programs_list" class="choose_list" >
+	
+</ul>
+
+<h5>Datasets To Compare</h5>
+<ul id="datasets_list" class="choose_list" >
+	
+</ul>
+
+
+<% end -%>
+<h4>Q1: What Dataset type do you want to compare?</h4>
+<div id="task_type_question">
+	<ul id="dset_type_list">
+		<% ['Binary', 'Multiclass', 'Regression'].each do |dset_type|%>
+		<li>
+			<%= button_to_remote dset_type, :url => {:action => 'compare_update_tables', :id => dset_type} %>
+		</li>
+		<% end -%>
+	</ul>
+
+</div>
+<br>
+<h4>Q2: Choose several programs and datasets to compare</h4>
+<div id="programs_and_datasets_box" style="width:100%; display:none">
+	<div id="programs_list_box" style="width:45%; float:left">
+		
+		<div id="prg_choose" >
+
+		</div>
+	</div>
+	<div id="datasets_list_box" style="width:45%; float:left">
+
+		<div id="dset_choose" >
+
+		</div>
+	</div>
+	
+	<div style="clear:both"> </div>
+
+	<%= button_to_remote 'Compare Selected',
+	:url        =>  { :action =>  'make_comparison', :id => 1},
+	:with => "'datasets='+gatherAtts('datasets_list','dsetid').toJSON() + 
+		'&programs=' + gatherAtts('programs_list','prgid').toJSON()" %>
+</div>
+<br>
+<h4>Results:</h4>
+<div id="results_box" style="display:none">
+	<div id="output" >
+	</div>
+	<%= button_to_function "Back", "new Effect.BlindUp('results_box');
+	new Effect.BlindDown('programs_and_datasets_box', {queue: 'end'})" %>
+</div>

@@ -1,0 +1,27 @@
+<% header = %w{DatasetName DatasetID ProgramName ProgramID ModelSelection?} %>
+<% rows = [] %>
+<% count = 0 %>
+<% @programs.each do |prg|
+	@datasets.each do |dset|
+		count = count + 1
+		hidden_tags = (hidden_field_tag ("runs[#{count}][dataset_id]", dset.id)) + "\n"
+		hidden_tags << (hidden_field_tag ("runs[#{count}][program_id]", prg.id)) + "\n"
+		row = [dset.name, dset.id.to_s, prg.name, prg.id,
+			hidden_tags + (check_box_tag "runs[#{count}][modelselect]", "yes", false)]
+		rows << row
+	end
+end %>
+
+<% form_remote_tag :html => {
+		:action => {:action => 'create_several_runs', :controller => 'runs'},
+		:id => 'multiple_runs_form'
+	},
+	:after => "$('multiple_runs_form').disable(); $('creation_result').show()",
+	:url => {:action => 'create_several_runs', :controller => 'runs'} do %>
+<%= make_nice_table header, rows, "Initiating the Following Runs" %>
+<%= submit_tag "confirm" %>
+<% end %>
+
+<div id="creation_result" style="border:1px solid black; margin-top: 20px; padding:20px; clear:both; display:none;">
+	<h2>Attempting to generate runs:</h2>
+</div>

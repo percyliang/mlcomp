@@ -1,0 +1,91 @@
+<h2>Domains</h2>
+
+A domain defines a particular machine learning task.
+Each domain is equipped with the following:
+<ul>
+  <li>a particular dataset format,</li>
+  <li>a particular program interface, and</li>
+  <li>standard evaluation metrics.</li>
+</ul>
+Please contact us if you want to add a domain for your problem.<p>
+
+There are two types of domains:
+<ul>
+  <li><b>Supervised learning</b> (e.g., classification, regression):
+  For these domains,
+  a run consists of two phases: <b>learn</b> and <b>predict</b>.
+  Datasets must be split into two shards (for train and test).</li>
+  <li><b>Performing</b> (e.g., clustering, optimization): for these domains,
+  there is only one phase: <b>perform</b>.
+  Datasets contain only one shard <b>raw</b>.</li>
+</ul>
+
+<span class=newHighlight>NEW</span>: <a href="#newDomain">create your own custom domains</a>.
+
+<%
+Domain.names.each do |name|
+  domain = Domain.get(name)
+%>
+
+  <p>
+  <hr>
+  <h4><b><%= domain.name %></b></h4>
+
+  <p><b>Type</b>: <%= domain.kind %></p>
+
+  <p><b>Task description</b>:
+  <%= domain.taskDescription %></p>
+
+  <p><b>Dataset format:</b>
+  <div class="blurb">
+  <%= domain.datasetDescription %>
+  <p>Click here to see a <%= link_to 'sample dataset', :controller => 'datasets', :action => 'show', :id => domain.sampleDataset %>.</p>
+  </div>
+  </p>
+
+  <p><%= link_to 'Configuration file', :controller => 'general_display', :action => 'domain_file', :domain => domain.name %>
+  </p>
+<% end %>
+
+<hr>
+<a name="newDomain"></a>
+<h3><b>Creating a New Domain</b></h3>
+
+<% domain = Domain.get("DocumentClassification") %>
+
+If you have a task that does not fall into one of standard categories, you can
+create a new domain.  Follow the instructions below:
+<ol>
+  <li>Decide if your domain kind is supervised-learning (involves a separate
+  train/test phase) or performing (only one phase).
+  <li>Decide on the dataset format (input) and the format for the output of a
+  program that operates in that domain.
+  <li>Create a sample dataset.
+  For example, <%= link_to 'document classification', :controller => 'datasets', :action => 'show', :id => domain.sampleDataset %>.
+  This dataset should be small but not degenerate, just complicated enough to
+  demonstrate the characteristics of the format and domain.
+  <li>Create the helper program for this domain.
+  The program should support the following operations:
+  <ul>
+    <li><tt>inspect <em>datashardPath</em></tt>: checks that the given datashard conforms to the format,
+      and if so, extracts summary statistics and writes it out in a YAML format to a <tt>status</tt> file.
+    <li><tt>split <em>rawDatashardPath</em> <em>trainDatashardPath</em> <em>testDatashardPath</em></tt>:
+      reads in the raw datashard and splits up the examples into training and test,
+      and outputs the examples to the corresponding file.  This operation is only for supervised-learning domains.
+    <li><tt>stripLabels <em>inDatashardPath</em> <em>outDatashardPath</em></tt>:
+      reads in a datashard from <em>inDatashardPath</em>, removes the labels (e.g., replacing with -1, +1 with 0)
+      and outputs the result to <em>outDatashardPath</em>.
+    <li><tt>evaluate <em>datashardPath</em> <em>predictionPath</em></tt>:
+      read in the true outputs from <em>datashardPath</em> and a program's predicted
+      outputs from <em>predictionPath</em> and computes any error metrics suitable for that domain.
+      Results should be written to the <tt>status</tt> file.
+  </ul>
+  For example, here is the program that does the above
+  for <%= link_to 'document classification', :controller => 'programs', :action => 'show', :id => domain.utilsProgram %>.
+  <li>Write a configuration file, which should be a YAML file.
+  The configuration file for
+  <%= link_to 'document classification', :controller => 'general_display', :action => 'domain_file', :domain => domain.name %>.
+</ol>
+Email the sample dataset, the helper program, and the configuration file to <a
+  href="mailto:mlcomp.support@gmail.com">mlcomp.support@gmail.com</a>
+and we will incorporate it into MLcomp.

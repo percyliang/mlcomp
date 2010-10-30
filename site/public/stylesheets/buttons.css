@@ -1,0 +1,103 @@
+/* @override http://localhost:3000/stylesheets/buttons.css?1256799372 */
+
+/* BUTTONS */
+
+div.buttons {
+	line-height:1.8em;
+	display: block;
+/*	float: left;*/
+}
+
+.buttons ul {
+	list-style-type: none;
+	margin: 0; padding: 0;
+/*	display: inline;*/
+	padding-top:10px;
+	list-style-image: none;
+}
+
+.buttons a{
+    background-color:#f5f5f5;
+    border:1px solid #3E362F;
+    border-top:1px solid #BCBCB4;
+    border-left:1px solid #BCBCB4;
+    font-size:100%;
+    line-height:40px;
+    text-decoration:none;
+    font-weight:bold;
+    color:#A90000;
+    cursor:pointer;
+    padding:4px 10px 4px 7px; /* Links */
+}
+
+.buttons a.smallbutton {
+	line-height:20px;
+	padding:2px 5px 2px 4px;
+}
+
+.buttons button{
+    width:auto;
+    overflow:visible;
+    padding:2px 10px 3px 7px; /* IE6 */
+}
+.buttons button[type]{
+    padding:5px 10px 5px 7px; /* Firefox */
+    line-height:17px; /* Safari */
+}
+*:first-child+html button[type]{
+    padding:4px 10px 3px 7px; /* IE7 */
+}
+.buttons button img, .buttons a img{
+    margin:0 3px -3px 0 !important;
+    padding:0;
+    border:none;
+    width:16px;
+    height:16px;
+}
+
+/* STANDARD */
+
+button:hover, .buttons a:hover{
+    background-color:#E5E1B7;
+    border:1px solid #ddd;
+    color:#3E362F;
+}
+.buttons a:active{
+    background-color:#9A9670;
+    border:1px solid #3E362F;
+    border-bottom:1px solid #BCBCB4;
+    border-right:1px solid #BCBCB4;
+    color:#fff;
+}
+
+/* POSITIVE */
+
+button.positive, .buttons a.positive{
+    color:#529214;
+}
+.buttons a.positive:hover, button.positive:hover{
+    background-color:#E6EFC2;
+    border:1px solid #C6D880;
+    color:#529214;
+}
+.buttons a.positive:active{
+    background-color:#529214;
+    border:1px solid #529214;
+    color:#fff;
+}
+
+/* NEGATIVE */
+
+.buttons a.negative, button.negative{
+    color:#d12f19;
+}
+.buttons a.negative:hover, button.negative:hover{
+    background:#fbe3e4;
+    border:1px solid #fbc2c4;
+    color:#d12f19;
+}
+.buttons a.negative:active{
+    background-color:#d12f19;
+    border:1px solid #d12f19;
+    color:#fff;
+}

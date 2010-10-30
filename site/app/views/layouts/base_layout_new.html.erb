@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" id="www-yourdomain-com">
+<head>
+	<link rel="shortcut icon" href="/images/favicon.ico" />
+  
+	<title><%= @pagetitle %></title>
+	
+	<%= stylesheet_link_tag 'screen' %>
+	<%= stylesheet_link_tag 'buttons' %>
+	<%= stylesheet_link_tag 'prototip.css' %>
+	
+	<%= javascript_include_tag :defaults %>
+	<%= javascript_include_tag 'prototip/prototip.js' %>
+		
+		<script type="text/javascript" charset="utf-8">
+		    window._token = '<%= form_authenticity_token -%>';
+		</script>
+
+</head>
+
+<body id="bhome">
+	
+	<div style="position:absolute; top:0px; left:300px">
+		<%= image_tag 'spinner2.gif', :id => 'spinner', :style => 'display:none; float:left' %>
+	</div>
+
+	<div id="header">
+		<div style="float:left">
+			<h1><%= link_to "MLcomp", {:controller => 'general_display'} %> <span id="header_subtitle">version alpha</span><span style="font-size:10pt; margin-left:20px; color:#848379; width:100px">
+
+			      <b>Statistics</b>:
+			      <%= User.count %> users,
+			      <%= Dataset.count %> datasets,
+			      <%= Program.count %> programs,
+			      <%= Run.count %> runs (<%= Run.countByStatus('ready') %> queued, <%= Run.countByStatus('running') %> running),
+			      <%= Worker.countActive %> workers
+			    </span>
+			</h1>
+			
+		</div>
+
+	<div style="clear:both"></div>
+	</div>
+
+	<div id="navigation">
+		<ul style="margin:0">
+      <% links = []
+         links << ['Home', 'general_display']
+         links << ['My Stuff', 'my_stuff'] if loggedin?
+			   links << ['Programs', 'programs']
+			   links << ['Datasets', 'datasets']
+			   #links << ['Runs', 'runs']
+         links << ['Users','users'] if isadmin
+         links << ['Workers','workers'] if isadmin
+         links << ['Help', 'faq']
+         links << ['About Us', 'help/about_us.html', 'static']
+         links.each do |link| %>
+       <li>
+         <% html_options = params[:controller] == (link[2] || link[1]) ? {:class => 'current_view'} : {} %>
+         <%= link_to link[0], {:controller => link[1], :action => 'index'}, html_options %>
+       </li>
+      <% end %>
+    </ul>
+
+    <% if not session[:user].nil? %>
+      <div id="user_line">
+        <%= session[:user].fullname %> (<%= session[:user].username %>)
+        <%= adminLink %>
+        <% html_options = params[:controller] == "users" ? {:class => 'current_view'} : {} %>
+        <%= link_to "Profile", {:controller => 'users', :action => 'edit'}, html_options %>
+        <%= link_to "Logout", :controller => 'users', :action => 'logout' %>
+      </div>
+    <% end %>
+	</div>
+	
+
+	<div id="wrapper">
+		<div id="content-wrapper">
+			<% if flash[:notice] || flash[:error] %>
+			<div id="message_line" style="font-size: 1.3em; margin:0px 100px 0px 100px;">
+				<div id="message_box" style="margin: 0 auto; width:70%; border:1px dotted #ddd; padding:10px; text-align:center">
+					<span style="color: green"><%= flash[:notice] %></span>
+					<% if flash[:notice] && flash[:error] %>
+					<br>
+					<% end %>
+			    	<span style="color: red"><%= flash[:error] %></span>
+				</div>
+
+			</div>
+			<% javascript_tag do %>
+				$('message_box').highlight();
+			<% end %>
+			<% end %>
+			<%= yield %>
+		</div>
+	</div>
+	
+	<div id="footer">
+	</div>
+	
+	<%= javascript_tag "refreshAllTips();" %>
+
+	<script type="text/javascript">
+	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+	</script>
+	<script type="text/javascript">
+	try {
+	var pageTracker = _gat._getTracker("UA-69610-7");
+	pageTracker._trackPageview();
+	} catch(err) {}</script>
+</body>
+</html>

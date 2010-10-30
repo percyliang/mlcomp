@@ -1,0 +1,11 @@
+#!/usr/bin/ruby
+
+def add(s)
+  cmd = "site/script/mlcomp/resource #{ARGV.join(' ')} -add #{s}"
+  puts cmd
+  exit 1 unless system("bash", "-c", cmd)
+end
+
+# Recursively add everything
+add('domains/core')
+add('domains')

@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" id="www-yourdomain-com">
+
+<head>
+  
+	<title>MLcomp</title>
+	
+	<!-- <meta http-equiv="content-language" content="en-us" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	
+	<meta name="author" content="Company name goes here" />
+	<meta name="design" content="Sadhana Ganapathiraju" />
+	<meta name="description" content="Description goes here" />
+	<meta name="keywords" content="And the keywords go here" /> -->
+	
+	<!-- <link rel="stylesheet" type="text/css" media="screen,projection" href="screen.css" /> -->
+	<%= stylesheet_link_tag 'screen' %>
+	
+	<%= javascript_include_tag :defaults %>
+	
+	<!--[if lt ie 7]>
+	
+		<link rel="stylesheet" type="text/css" media="screen,projection" href="ie-win.css" />
+	
+	<![endif]-->
+	
+	<!-- <link rel="start" title="Home" href="http://www.example.com/" /> -->
+		<%= javascript_include_tag :defaults %>
+		
+		<script type="text/javascript" charset="utf-8">
+		    window._token = '<%= form_authenticity_token -%>';
+		</script>
+
+</head>
+
+<body id="bhome">
+
+	<div id="header">
+		<div style="width:200px; float:left">
+			<h3><a href="#00" title="Home">Create Run</a></h3>
+		</div>
+	<div style="clear:both"></div>
+	</div>
+
+	<div id="popup-wrapper">
+		<div id="popup-content-wrapper">
+			<div id="popup-content" style="min-height:300px">
+				<%= yield %>
+			</div>
+		</div>
+	</div>
+	
+	<div id="footer">
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,96 @@
+<% content_for :sidebar do %>
+  <div class="sidebar_header">
+  	Dataset Actions:
+  </div>
+  <div class="buttons">
+	<% button_list = [] %>
+	<% button_list += [datasetEditButton, datasetReplaceButton, datasetDeleteButton] if ownsDataset %>
+    <% button_list += [datasetNewButton, datasetShowAllButton] %>
+	<%= make_list "ul", button_list %>
+  </div>
+<% end %>
+
+<% javascript_tag do %>
+	var dsetid_torun = <%= @dataset.id.to_s %>;
+<% end %>
+
+<div id="prg_or_dset_display_box">
+	
+	<div id="prg_dset_display_header">
+	<table border="0" cellspacing="0" cellpadding="5">
+		<tr><td><%= midDatasetIcon %></td><td><%= @dataset.name %></td></tr>
+	</table>
+    </div>
+	<div id="prg_or_dset_name">
+
+		<%= @dataset.description %>
+	</div>
+
+	<div id="prg_or_dset_info">
+		
+		<% dset_generic_info = [
+			["Format:", @dataset.format],
+			["User:", user_link(@dataset.user)],
+			["Size:", Format.space(@dataset.disk_size)],
+			["Status:", datasetStatus(@dataset)],
+			["Access:", @dataset.restricted_access ? "restricted_access" : "open"]
+		] %>
+
+	    <% if ownsDataset || (not @dataset.restricted_access) 
+		      link = "<span id='dataset_download_box'>" + link_to_remote("[make zip file]",
+	             :before => "$('dataset_download_box').update('Packaging...')",
+	             :url => { :action => 'create_bundle', :id => @dataset.id }) + "</span>"
+		      dset_generic_info << ['Download:', (loggedin? ? link : "Login required!")]
+		end %>
+		
+		<% fieldSpec = Domain.get(@dataset.format).datasetFieldSpec
+		fieldSpec.names.each_with_index do |fspecname,i| 
+      dset_generic_info << ["<span title=\"#{fieldSpec.descriptions[i]}\">#{fspecname}</span>", fieldSpec.render(i, @dataset.getSortField(i))]
+		end %>
+
+		<table border="0" cellspacing="0" cellpadding="0" class="attribute_table">
+			<% dset_generic_info.each do |title,value| %>
+			<tr>
+				<td><label><%= title %></label></td>
+				<td><%= value %></td>
+			</tr>
+			<% end -%>
+		</table>
+		<br>
+
+	</div>
+	<div style="clear:both"></div>
+	
+</div><br>
+
+<% if @dataset.process_status == "success"
+  runs_tparams = Program.create_tparams(:taskTypes => Reduction.compatibleTaskTypes(@dataset.format))
+  runs_tparams.each do |key,tparams|
+    tparams[:current_sort_col] = 'avg_percentile'
+    tparams[:reverse_sort] = true
+    tparams[:columns] = [:prg_create_run, :prg_name, :prg_created_at, :prg_user, :prg_avg_percentile, :prg_num_runs]
+    tparams[:title] = "Select a program"
+  end %>
+  <% show_hide_item "<b>Run a program on this dataset</b>" do %>
+    <br>
+    <%= render :partial => 'table/many_table_show', :locals => { :tparams => runs_tparams } %>
+  <% end -%>
+  <br><br>
+<% end %>
+
+<% if @dataset.process_status == "success" %>
+  <%= render :partial => 'table/many_table_show', :locals => { :tparams => @tparams } %>
+  <br><br>
+<% end %>
+
+<% if @dataset.process_status == "success" %>
+	<% show_hide_item "Processing details" do %>
+	<br>
+		<div id="dataset_result_tree">
+			<%= Format.hashTreeToHTML(@dataset.resultTree) %>
+		</div>
+	<% end -%>
+  <br><br>
+<% end -%>
+
+<%= render :partial => 'shared/comments', :locals => {:object => @dataset} %>

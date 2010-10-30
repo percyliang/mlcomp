@@ -1,0 +1,28 @@
+<% default_tparams = {
+:name => "programs",
+:model => 'Program', 
+:columns => [:prg_add_to_list, :prg_name_nolink, :prg_user_nolink],
+:limit => 10,
+:width => '100%',
+:show_footer => true,
+:paginate => true,
+:pagination_page => 0, 
+:include => 'user'
+} %>
+<% all_tparams = [
+	['(compatible)', {
+		:filters => [['task_type', RunInfo.compatibleTaskTypes(@dset_format), 'in']]
+		}
+	],
+	[
+		'(mine)', 
+		{:filters => [['task_type', RunInfo.compatibleTaskTypes(@dset_format), 'in'],
+			['user_id', session[:user].id]]
+		}
+]].map do |name,hash|
+	[name, default_tparams.merge(hash)]
+end %>
+<%= render :partial => 'table/many_table_show', 
+	:locals => { 
+		:tparams => all_tparams #Program.create_tparams(:taskTypes => RunInfo.compatibleTaskTypes(@dset_format)) 
+	} %>

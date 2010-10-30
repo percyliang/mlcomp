@@ -1,0 +1,16 @@
+#!/usr/bin/ruby
+
+require 'svmlight-format'
+
+class RegressionFormat < SVMLightFormat
+  def isValidLabel(y); y.to_f_or_nil != nil end
+
+  def updateLabelSummary(summary, y)
+    y = y.to_f_or_nil
+    summary = {'minLabelValue' => Float::MAX, 'maxLabelValue' => Float::MIN} if not summary
+    summary['minLabelValue'] = [summary['minLabelValue'], y].min
+    summary['maxLabelValue'] = [summary['maxLabelValue'], y].max
+    summary
+  end
+end
+RegressionFormat.new.main

@@ -1,0 +1,83 @@
+<% content_for :sidebar do %>
+  <div class="sidebar_header">
+  	Run Actions:
+  </div>
+  <div class="buttons" style="margin:10px">
+	<% btn_list = [] %>
+    <% if ownsRun %>
+      <% btn_list << runKillButton if @run.running? %>
+      <% btn_list << runDeleteButton %>
+    <% end -%>
+    <% btn_list << runShowAllButton %>
+	<%= make_list "ul", btn_list %>
+  </div>
+<% end %>
+
+<div id="run_display_box">
+
+	<div id="run_elements_box">
+		<div id="run_display_header">
+			<table border="0" cellspacing="0" cellpadding="5">
+				<tr><td><%= midRunIcon %></td><td>Run <%= @run.id %></td></tr>
+			</table>
+		</div>
+		<% table_elts = [["Creator", user_link(@run.user)],
+		["Program", program_link(@run.core_program)],
+		["Dataset", dataset_link(@run.core_dataset)],
+		["Task type", @run.core_program ? @run.core_program.task_type : "n/a"],
+		["Created", timeSince(@run.updated_at, {})] ] %>
+		<% if @run.status.status != 'ready' && (session[:isadmin] || (not @run.restricted_access(session[:user])))
+			link = "<span id='run_download_box'>" + link_to_remote("[make zip file]",
+		      :before => "$('run_download_box').update('Packaging...')",
+		      :url => { :action => 'create_bundle', :id => @run.id }) + "</span>"
+			table_elts << ["Download", (loggedin? ? link : "Login required!")] 
+		end %>
+		<%= info_table table_elts %>
+	</div>
+	
+	<%= render :partial => 'run_status_box', :locals => {:run => @run} %>
+	
+	<div style="clear:both"></div>
+	
+
+</div>
+
+<h4>Log file</h4>
+
+<pre id="run_log_box" class="run_log">
+<%= @run.logContentsStr %>
+</pre>
+
+<% show_hide_item "Run specification" do %>
+<div id="result_tree"><%=
+begin
+  Format.hashTreeToHTML(runInfoToRunSpecTree(@run.info))
+rescue Exception
+  "Error: #{$!}"
+end
+%></div>
+<% end -%>
+
+<% show_hide_item "Results" do %>
+<div id="result_tree"><%= Format.hashTreeToHTML(@run.resultTree) %></div>
+<% end -%>
+
+
+
+<br><br>
+
+<%= render :partial => 'shared/comments', :locals => {:object => @run} %>
+
+<% javascript_tag do %>
+	var executor;
+	function setExecutor(secs) {
+		if (executor) {executor.stop();}
+		executor = new PeriodicalExecuter(function() {
+			<%= remote_function(:url => {:controller => 'runs', :action => 'update_show', :id => @run.id})%>
+		}, secs);
+	}
+	<%- if @run.status.status == "ready" || @run.status.status == "running" %>
+		<%- numSecs = (@run.status.status == "ready") ? 60 : 10 %>
+		<%= "setExecutor(#{numSecs});" %>
+	<%- end -%>
+<%- end -%>

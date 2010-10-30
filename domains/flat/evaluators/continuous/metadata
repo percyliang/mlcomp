@@ -1,0 +1,3 @@
+name: regression-evaluator
+description: Evaluates predictions of Regression datasets (continuous outputs).
+task: Evaluate

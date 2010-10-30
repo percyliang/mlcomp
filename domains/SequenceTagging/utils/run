@@ -1,0 +1,118 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+class DatasetSplit
+  def initialize(numExamples, trainSplitFrac)
+    # Two ways to split
+    #   - Order-independent (this is what we do now)
+    #   - First portion is train, second portion is test
+    #     (has advantage of being more realistic)
+    permutation = (0...numExamples).to_a.shuffle(42)
+    @isTrain = [false] * numExamples
+    numTrainExamples = (numExamples * trainSplitFrac + 0.5).to_i
+    (0...numTrainExamples).each { |i| @isTrain[permutation[i]] = true }
+  end
+
+  def isTrain(i); @isTrain[i] end
+end
+
+TRAIN_SPLIT_FRAC = 0.7
+
+# Crude test: shards are files, splits are directories containing train and test
+def split?(dirPath); File.directory?(dirPath) end 
+
+def foreachExample(path)
+  lines = []
+  isBlank = true
+  flush = lambda { yield lines if lines.size > 0; lines = [] }
+  # Count number of transitions into text
+  IO.foreach(path) { |line|
+    if line =~ /\S/
+      isBlank = false
+      numExamples += 1 if isBlank
+      lines << line
+    else
+      flush.call
+      isBlank = true
+    end
+  }
+  flush.call
+end
+
+def inspect(path)
+  exitFail("File doesn't exist: '#{path}'") if not File.exists?(path)
+
+  numExamples = 0
+  numTokens = 0
+  numFeatures = nil
+  outputs = {}
+  foreachExample(path) { |lines|
+    numExamples += 1
+    numTokens += lines.size
+    lines.each { |line|
+      tokens = line.split
+      outputs[tokens[-1]] = true
+      newNumFeatures = tokens.size - 1
+      if numFeatures != nil && numFeatures != newNumFeatures
+        exitFail("Different number of features: #{numFeatures} and #{newNumFeatures}")
+      end
+      numFeatures = newNumFeatures
+    }
+  }
+  writeStatus({'numExamples' => numExamples,
+               'numTokens' => numTokens,
+               'numFeatureColumns' => numFeatures,
+               'numLabels' => outputs.size,
+               'labels' => outputs.keys.sort.join(' ')})
+  exitSuccess
+end
+
+def computeNumExamples(path)
+  n = 0
+  foreachExample(path) { |lines| n += 1 }
+  n
+end
+def split(inPath, trainPath, testPath)
+  trainOut = File.open(trainPath, "w")
+  testOut = File.open(testPath, "w")
+
+  # Split the data
+  split = DatasetSplit.new(computeNumExamples(inPath), TRAIN_SPLIT_FRAC)
+  lineNum = 0
+  foreachExample(inPath) { |lines|
+    (split.isTrain(lineNum) ? trainOut : testOut).puts(lines+[""])
+    lineNum += 1
+  }
+
+  trainOut.close
+  testOut.close
+end
+
+def stripLabels(inPath, outPath)
+  # Assume that the last column is the output label, which we just replace with -
+  out = open(outPath, "w")
+  IO.foreach(inPath) { |line|
+    tokens = line.split
+    if tokens.size == 0
+      out.puts
+    else
+      tokens[-1] = '-'
+      out.puts tokens.join(' ')
+    end
+  }
+  out.close
+end
+
+cmd = ARGV.shift
+case cmd
+  when 'inspect'
+    path, = parseArgs(:file)
+    inspect(path)
+  when 'split'
+    rawPath, trainPath, testPath = parseArgs(:file, :nonexist, :nonexist)
+    split(rawPath, trainPath, testPath)
+  when 'stripLabels'
+    inPath, outPath = parseArgs(:file, :nonexist)
+    stripLabels(inPath, outPath)
+end

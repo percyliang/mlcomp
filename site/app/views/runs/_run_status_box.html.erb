@@ -1,0 +1,46 @@
+<div id="run_status_box">
+	<div id="run_status">
+		<label>Status:</label> <%= case run.status.status  
+			when "done" then "Done! " + icon("flag_green") 
+			when "ready" then "Queued... " + icon("icon_clock")
+			when "failed" then  "Failed! " + icon("action_stop") 
+			when "running" then  "Running..." + image_tag( 'job_running2.gif')
+		end %>
+	</div>
+	<% unless run.status.status == "done" %>
+	<div style="color:#888; font-size:0.8em">
+		Note: this page autoupdates while a run is in progress
+	</div>
+	<% end -%>
+	<div id="run_status_info">
+		<% info_data = [] %>
+		<% if run.status.status == "done"
+			info_data << ["Total Time", Format.time(run.status.real_time)]
+			info_data << ["Max Memory Usage", Format.space(run.status.max_memory_usage)] 
+		elsif run.status.status == "ready" 
+			info_data << ["No. Jobs Waiting", @queue_size] 
+			info_data << ["Pos. in Queue", @queue_pos]
+		elsif run.status.status == "running"
+			info_data << ["Total Time", Format.time(run.status.real_time)]
+			info_data << ["Max Memory Usage", Format.space(run.status.max_memory_usage)]
+		elsif run.status.status == "failed"
+			info_data << ["Reason", CGI.escapeHTML(run.resultTree['message'] || '(see end of log file)')]
+			info_data << ["Total Time", Format.time(run.status.real_time)]
+			info_data << ["Max Memory Usage", Format.space(run.status.max_memory_usage)]
+		end -%>
+		<% fieldSpec = Domain.get(run.core_dataset[:format]).runFieldSpec
+		fieldSpec.names.each_with_index do |fspecname,i| 
+      info_data << ["<span title=\"#{fieldSpec.descriptions[i]}\">#{fspecname}</span>", fieldSpec.render(i, run.getSortField(i))]
+		end %>
+
+		<table border="0" cellspacing="0" cellpadding="0" class="attribute_table">
+			<% info_data.each do |title,value| %>
+			<tr>
+				<td><label><%= title %></label></td>
+				<td><%= value %></td>
+			</tr>
+			<% end -%>
+		</table>
+	</div>
+</div>
+

@@ -1,0 +1,3 @@
+name: binary-sample
+format: BinaryClassification
+description: Sample dataset for sanity checking.
