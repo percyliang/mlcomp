@@ -1,3 +1,5 @@
+/* This script creates all the views on top of the Rails database tables. */
+
 /* --user=rails_user */
 use mlcomp_development;
 
