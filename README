@@ -5,31 +5,64 @@ The actual website is here:
 
 NOTE: always source the rc file (run . ./rc in bash) before running any of the following commands.
 
---- Installation
+### Installation
+
+# ALWAYS make sure to run the initialization script, it sets the correct environment variables:
+
+  . ./rc
+
+# You'll need to have:
+# 1) ruby version >= 1.8.7
+# 2) rubygems, rake, and libopenssl-ruby
+# 3) mysql -- the client AND server, with root access to the server
+#
+# On debian, these can be installed with the following command, but check the ruby version:
+
   sudo apt-get install mysql-server rake rubygems libopenssl-ruby # (for Debian)
-  sudo gem install -v=2.1.1 rails
-  sudo gem install json
-  sudo gem install rails_sql_views-0.7.0.gem
-  <Set up your ssh keys so that you can ssh into localhost (or wherever the worker is running) without typing a password.>
-    (run ssh-keygen on the master and add .ssh/id_rsa.pub to .ssh/authorized_keys on the worker)
+
+# You will also need three different gems installed.
+# The last of these depends on a local gem which we provide, but you must
+# install it from the root dir:
+
+  gem install -v=2.1.1 rails
+  gem install json
+  gem install rails_sql_views-0.7.0.gem
+
+
+# It'll be useful to set up your ssh keys so that you can ssh into localhost 
+# (or wherever the worker is running) without typing a password.
+# (run ssh-keygen on the master and add .ssh/id_rsa.pub to .ssh/authorized_keys on the worker)
+
+# Now we need to setup the database. We'll first initialize the database, and
+# grant permissions. NOTE: here you'll be needing the mysql root password
+
   ./init-db
+
+# Now we update the db with the correct schema by running the rails migrations
+
+  ./update-db
+
+# Now we'll seed the db with initial content. This should search the 
+
   ./seed-db
 
---- To run MLcomp, start the following processes (in different terminals):
+### To run MLcomp, start the following processes (in different terminals):
   ./run-server # Starts the Rails web server (on port 3000 by default)
   ./run-master # Starts the run master (communicates with workers to run jobs)
   cd worker && ./worker -server localhost # Starts up a worker
   ./run-stats # Starts a process that computes general statistics and updates the database (optional)
 
---- Relevant directories
-  site: where the Rails webserver and code reside
-  var: things which have been uploaded sit here (with corresponding entries in the database)
-  domains: specification files for each domain in system along with helper programs and sample datasets to be uploaded.
+### Relevant directories
+# ./site: where the Rails webserver and code reside
+# ./var: DO NOT TOUCH -- this is where MLcomp stores programs/datasets/runs which
+#		 have been uploaded and correspond to database entries
+# ./domains: specification files for each domain in system along with 
+#		 helper programs and sample datasets to be uploaded.
 
---- When updating the system from the repository:
+### When updating the system from the repository:
   git pull
   cd site && ./update-db # Update database
 
---- Handy database commands
+### Handy database commands
   mysql -u rails_user mlcomp_development # inspect it
   mysqldump -u rails_user mlcomp_development > mlcomp_development.backup # dump contents

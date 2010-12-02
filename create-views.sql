@@ -8,7 +8,7 @@ drop view if exists non_helper_runs;
 create view non_helper_runs as select runs.id, runs.error, runs.core_dataset_id, runs.updated_at from runs inner join programs on runs.core_program_id = programs.id where programs.is_helper is null or programs.is_helper = false;
 
 /* TODO: create more composite indices - move into rails migrations */
-alter table programs drop index idx_helper;
+-- alter table programs drop index idx_helper;
 create index idx_helper on programs (is_helper, id);
 
 /* For each dataset, look at non-helper runs (those whose core programs are not helpers) on that dataset;

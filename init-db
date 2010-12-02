@@ -4,11 +4,17 @@
 
 . ./rc
 
+# We need to create the root directory for programs/datasets/etc.
+mkdir -p $MLCOMP_BASE_PATH
+mkdir -p $MLCOMP_BASE_PATH/programs
+mkdir -p $MLCOMP_BASE_PATH/datasets
+mkdir -p $MLCOMP_BASE_PATH/runs
+
+
 # Create the database.
+echo "Do you know your mysql root password? It is necessary to creat the mlcomp_development db, and to grant permissions to it. You should now be prompted for your password."
 cat <<EOF | mysql -u root -p
 create database mlcomp_development;
 grant all on mlcomp_development.* to rails_user@localhost;
 EOF
 
-# Update the database schema by doing Rails migrations.
-./update-db
