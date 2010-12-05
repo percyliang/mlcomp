@@ -43,6 +43,7 @@ module ApplicationHelper
   end
 
   def dataset_link dset
+    return nil unless dset
     link_to shrt(dset.name), { :controller => 'datasets', :action => 'show', :id => dset }, 
     { 
       :class => 'dataset_link', 
@@ -56,6 +57,7 @@ module ApplicationHelper
   end
 
   def program_link prg
+    return nil unless prg
     link_to shrt(prg.name || "(no name)"), { :controller => 'programs', :action => 'show', :id => prg }, { 
       :class => 'program_link', 
       :type => "Program",

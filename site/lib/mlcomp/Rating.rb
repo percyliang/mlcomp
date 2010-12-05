@@ -62,7 +62,7 @@ class RatingEngine
       s = r.status.status
       program = r.info.coreProgram
       dataset = r.info.coreDataset
-      next if program.is_helper
+      next if (not program) || program.is_helper
       lines << [dataset.format, program.id, program.name, dataset.id, dataset.name, r.id, r.tuneHyperparameters ? true : false, s == 'done' ? r.error : 'failed'].join("\t")
       if s == 'done' && r.error
         add.call(program, dataset, r.error)

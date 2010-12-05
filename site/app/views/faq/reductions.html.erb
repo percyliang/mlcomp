@@ -1,0 +1,100 @@
+<h2>Reductions</h2>
+
+A reduction is a very powerful technique in computer science that allows one to
+transform a problem at hand into another problem which is more convenient to
+solve.  In the context of MLcomp, problems corresponds to domains.  In the simple case,
+reductions allow you to run programs written for one domain on datasets
+in another domain.  But more generally, <em>a reduction is just an MLcomp
+  program which takes other MLcomp programs as input</em>.
+<p>
+
+Some examples of reductions which are already happening automatically for you:
+<ul>
+  <li>
+  One-versus-all conversion: this reduction is a MulticlassClassification program R
+  that takes a BinaryClassification program B as input.
+  Here's how R works underneath the hood:
+  Given a MulticlassClassification dataset D with k labels, R creates
+  k BinaryClassification datasets D1, ..., Dk.  It then calls B
+  k times to learn on each of these newly-created datasets.
+  To make predictions on D, R synthesizes the k predictions on D1,..., Dk.
+  </li>
+  <li>
+  Hyperparameter tuning: this reduction is a MulticlassClassification program T
+  that takes another MulticlassClassification program M as input.
+  T invokes M with different hyperparameters and selects the setting that works the best.
+  It predicts based on M with that best hyperparameter setting.
+  This example shows that reductions can be useful even within the same domain.
+  <li>
+  Ensemble learning: this reduction is a MulticlassClassification program E
+  that takes a set of MulticlassClassification programs M1,...,Mn.
+  Given a dataset D, E tells each Mi to learn on D.
+  Then it can synthesize the results.
+  This example shows that reductions can be built out of multiple programs.
+</ul>
+
+Other examples include feature extraction, online-to-batch conversion,
+self-training (semi-supervised to supervised), etc.  Importantly, reductions
+can be nested, so that one of the programs that the ensemble learner takes
+could be itself a reduction, say, built with hyperparameter tuning.  This
+provides a very powerful way of composing functionality developed by different
+users.  <p>
+
+Formally, a reduction is just another MLcomp program in some target domain.
+
+In your metadata file, add a line stating the arguments that the constructor should take.
+<pre>
+construct: arg1:Program[Domain1] arg2:Program[Domain2] ...
+</pre>
+For example, here is the line for the <tt>one-vs-all</tt> program:
+<pre>
+construct: binaryLearner:Program[BinaryClassification]
+</pre>
+
+Your run script will be called with the arguments specified by the metadata:
+<pre>
+% ./run construct path/to/arg1 path/to/arg2 ...
+</pre>
+For the <tt>one-vs-all</tt> program, we have:
+<pre>
+% ./run construct path/to/BinaryClassification/program
+</pre>
+MLcomp will still call your program with <tt>./run learn ...</tt> and </tt>./run predict ...</tt>
+as usual.  Remember, your reduction should behave like a normal program in the target domain
+(in the case of <tt>one-vs-all</tt>, MulticlassClassification).<p>
+
+When <tt>./run construct</tt> is called, you should simply save the arguments to a file.
+Then when <tt>./run learn ...</tt> is called, you can feel free to invoke the programs that you've saved
+(just cd into those directories and call <tt>./run learn ...</tt> or whatever you'd like).<p>
+
+As a running example, suppose that your program is in <tt>/home/mlcomp/run/program1</tt> and we call your program with
+<pre>
+% ./run construct ../program2
+</pre>
+
+Important notes:
+<ul>
+  <li>When you call programs via the run script, the current directory must be the program directory.
+  For the running example, you must do the following in your run script:
+<pre>
+cd ../program2
+./run ...
+</pre>
+  <li>When you change directories, relative paths must be updated appropriately
+  If you have a file <tt>foo</tt> and want to pass it into program3, you must do:
+<pre>
+cd ../program2
+./run ../program1/foo
+</pre>
+  <li>If you need to call a program more than once, you need to make a copy of that program
+  (just recursively copy that directory) to avoid collisions:
+<pre>
+cp -a ../program2 program2-copy
+cd program2-copy
+./run ../foo
+</pre>
+</ul>
+
+If you write in Ruby, include <a href="/general.rb">general.rb</a>, which will facilitate the calling of other programs.
+As an example, see the one-versus all reduction:
+<%= program_link Program.findByName('one-vs-all', nil) %>.

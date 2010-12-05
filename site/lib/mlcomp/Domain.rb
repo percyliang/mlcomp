@@ -64,9 +64,9 @@ class Domain
   attr_accessor :runFieldSpec, :datasetFieldSpec
   #attr_accessor :compatibleDatasetFormats
 
-  def utilsProgram; Program.findByName(@utilsProgramName, DomainException) end
-  def evaluatorProgram; Program.findByName(@evaluatorProgramName, DomainException) end
-  def sampleDataset; Dataset.findByName(@sampleDatasetName, DomainException) end
+  def utilsProgram; Program.findByName(@utilsProgramName, nil) end
+  def evaluatorProgram; Program.findByName(@evaluatorProgramName, nil) end
+  def sampleDataset; Dataset.findByName(@sampleDatasetName, nil) end
 
   def verify
     utilsProgram.taskTypes.index('Inspect') or raise "Program #{utilsProgramName} doesn't support the Inspect task"

@@ -154,7 +154,11 @@ class Program < ActiveRecord::Base
     if matches.size == 1
       matches[0]
     else
-      raise exceptionClass.new("Found #{matches.size} programs with name '#{name}'; wanted exactly one")
+      if exceptionClass
+        raise exceptionClass.new("Found #{matches.size} programs with name '#{name}'; wanted exactly one")
+      else
+        nil
+      end
     end
   end
   def self.findByIdOrNil(id)

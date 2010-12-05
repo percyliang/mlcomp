@@ -1,0 +1,50 @@
+<h2>Generating Executions</h2>
+An Execution is the application of a program (or programs) on a given dataset. 
+Of course, not all combinations are feasible, as the compatibility depends on the associated <em>types</em> of 
+the objects in question. Below we review the different algorithm and dataset types:
+<h3>Dataset Types</h3>
+<ul>
+	<li><%= dataset_task_name 'Binary' %> - A dataset with binary labels, i.e. in {0,1}</li>
+	<li><%= dataset_task_name 'Multiclass'%> - A dataset with a finite set integer-valued labels, e.g. in {0,1,2,3,4}</li>
+	<li><%= dataset_task_name 'Regression' %> - A dataset with real-valued label</li>
+</ul>
+<h3>Program Types</h3>
+<ul>
+	<li><%= program_task_name 'BinaryClassification' %> - A program with the ability to train on a dataset with binary labels</li>
+	<li><%= program_task_name 'MulticlassClassification'%> - A program with the ability to train on a dataset several (but finitely many) labels</li>
+	<li><%= program_task_name 'Regression' %> - A regression algorithm, i.e. can train on a dataset with real-valued labels</li>
+</ul>
+<h2>Compatible Executions</h2>
+Currently, MLcomp can support executions of the types mentioned below. While this list will be expanded to include more complex
+execution types, at this time executions consist of exactly one program with exactly one dataset.
+
+<div style="margin:20px;" class="emphasis_box">
+<table border="0" cellspacing="2" cellpadding="2">
+	<tr><th>Program Type</th><th>Dataset Type</th><th>Description</th></tr>
+	<tr>
+		<td><%= program_task_name 'BinaryClassification' %></td>
+		<td><%= dataset_task_name 'Binary' %></td>
+		<td>A Binary classification program trained on a binary dataset</td>
+	</tr>
+	<tr>
+		<td><%= program_task_name 'MulticlassClassification' %></td>
+		<td><%= dataset_task_name 'Binary' %></td>
+		<td>A Multiclass classification program trained on a binary dataset</td>
+	</tr>
+	<tr>
+		<td><%= program_task_name 'BinaryClassification' %></td>
+		<td><%= dataset_task_name 'Multiclass' %></td>
+		<td >Do we really support this?</td>
+	</tr>
+	<tr>
+		<td><%= program_task_name 'MulticlassClassification' %></td>
+		<td><%= dataset_task_name 'Multiclass' %></td>
+		<td>A Multiclass classification program trained on a Multiclass dataset</td>
+	</tr>
+	<tr>
+		<td><%= program_task_name 'Regression' %></td>
+		<td><%= dataset_task_name 'Regression' %></td>
+		<td>A Regression classification program trained on a regression dataset</td>
+	</tr>
+</table> 
+</div>

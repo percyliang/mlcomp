@@ -33,11 +33,12 @@
 #  - PerformingRunInfo
 #  - SupervisedLearningDatasetProcessorRunInfo
 #  - PerformingDatasetProcessorRunInfo
+#  - GenericRunInfo
 class RunInfo
   attr_accessor :run # Set later in run.rb
 
   def initialize(taskType)
-    @domain = Domain.get(taskType)
+    @domain = Domain.get(taskType) if taskType
   end
 
   # Create the specification for the default RunInfo (how to construct myself).

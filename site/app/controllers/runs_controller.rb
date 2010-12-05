@@ -91,7 +91,8 @@ class RunsController < ApplicationController
         allowedTime = params[:run][:allowedTime].to_f * 60
         @run = create_run(program, dataset, tune, allowedTime)
         @successes << {:program => program.name, :dataset => dataset.name}
-      rescue RunException => error
+      rescue Exception => error
+        puts "ERROR: #{error}" # TODO for JAKE: Print out this error message
         @errors << error
       end
       render :update do |page|

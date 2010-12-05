@@ -53,10 +53,12 @@ class ResourceManager
   
   # Hard-coded for supervised learning right now
   def isDataset(files)
+    files = files.map { |f| File.basename(f) }
     files.index('metadata') &&
       (files.index('raw') || (files.index('train') || files.index('test')))
   end
   def isProgram(files)
+    files = files.map { |f| File.basename(f) }
     files.index('metadata') && files.index('run')
   end
 
@@ -334,6 +336,7 @@ class ResourceManager
       puts "#{script} validateState"
       puts "#{script} refreshFromSpec"
       puts "#{script} master"
+      puts "#{script} commandServer"
       puts "#{script} ec2manager"
       puts "#{script} rateAll"
       puts "#{script} runHighlyRated"
@@ -356,6 +359,7 @@ class ResourceManager
       when 'validateState'   then ValidateState.main(*restArgs)
       when 'refreshFromSpec' then RefreshFromSpec.main(*restArgs)
       when 'master'          then RunMaster.main(*restArgs)
+      when 'commandServer'   then CommandServer.main(*restArgs)
       when 'ec2manager'      then EC2Manager.main(*restArgs)
       when 'rateAll'         then RatingEngine.new.rateAll(*restArgs)
       when 'runHighlyRated'  then RatingEngine.new.runHighlyRated(*restArgs)

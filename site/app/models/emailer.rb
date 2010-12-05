@@ -27,8 +27,8 @@ class Emailer < ActionMailer::Base
   
   def general_email(subject, body)
     @subject = subject
-    @recipients = ['mlcomp.support@gmail.com']
-    @from = 'MLcomp server <noreply@mlcomp.org>'
+    @recipients = ['jake@cs.berkeley.edu', 'pliang@cs.berkeley.edu', 'mlcomp.support@gmail.com']
+    @from = 'MLcomp server <mlcomp.support@gmail.com>'
     @sent_on = Time.now
     @body = {:body => body}
     @headers = {}

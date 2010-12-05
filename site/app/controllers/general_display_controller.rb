@@ -78,6 +78,15 @@ class GeneralDisplayController < ApplicationController
     end
   end
   
+  def mlcomp_tool
+    path = ENV['MLCOMP_SOURCE_PATH']+'/mlcomp-tool'
+    render :text => File.exists?(path) ? IO.readlines(path) : "", :content_type => 'text/plain'
+  end
+  def general_rb
+    path = ENV['MLCOMP_SOURCE_PATH']+'/site/lib/utils/general.rb'
+    render :text => File.exists?(path) ? IO.readlines(path) : "", :content_type => 'text/plain'
+  end
+  
   def front_page
     @pagetitle = "Welcome to MLcomp"
     if session[:user].nil?

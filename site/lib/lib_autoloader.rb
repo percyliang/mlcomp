@@ -26,6 +26,17 @@ if not defined?($lib_autoloaded)
     next unless path =~ /\.rb$/
     next if path == 'lib_autoloader.rb'
     require path
+
+    # If file name is uppercase, assume loading a single class with the same name
+    # as the Ruby file.  Otherwise, it's probably just a collection of utilities.
+    # Class X must be defined in X.rb.
+    #IO.foreach(path) { |line|
+    #  if line =~ /^class (\w+)/
+    #    className = $1
+    #    autoload(className.intern, path)
+    #    puts className
+    #  end
+    #}
   }
 
   Domain::load

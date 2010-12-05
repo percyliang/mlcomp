@@ -6,6 +6,7 @@
 
 # Specifies gem version of Rails to use when vendor/rails is not present
 RAILS_GEM_VERSION = '2.1.1' unless defined? RAILS_GEM_VERSION
+#RAILS_GEM_VERSION = '2.0.2' unless defined? RAILS_GEM_VERSION
 
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
@@ -33,11 +34,6 @@ Rails::Initializer.run do |config|
   # (by default production uses :info, the others :debug)
   # config.log_level = :debug
 
-  # Use the database for sessions instead of the cookie-based default,
-  # which shouldn't be used to store highly confidential information
-  # (create the session table with 'rake db:sessions:create')
-  # config.action_controller.session_store = :active_record_store
-
   # Your secret key for verifying cookie session data integrity.
   # If you change this key, all old sessions will become invalid!
   # Make sure the secret is at least 30 characters and all random, 
@@ -47,6 +43,10 @@ Rails::Initializer.run do |config|
     :secret      => 'c845c1633206daf98c8adfe2eeebf08f13014f9aff2d3f8ae038dda085fad7692cfe8019efe95107e10b24315b3e9c341786d6bbdc4db818f44e7e6555078e20'
   }
 
+  # Use the database for sessions instead of the cookie-based default,
+  # which shouldn't be used to store highly confidential information
+  # (create the session table with 'rake db:sessions:create')
+  # config.action_controller.session_store = :active_record_store
 
   # Use SQL instead of Active Record's schema dumper when creating the test database.
   # This is necessary if your schema can't be completely dumped by the schema dumper,

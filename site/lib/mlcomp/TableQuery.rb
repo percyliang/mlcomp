@@ -54,7 +54,7 @@ class TableQuery
     end
 
     sql = [conditions[0].join(" AND ")] + conditions[1]
-    #puts "SQL: #{sql.inspect}"
+    puts "SQL: #{sql.inspect}"
     #puts "table_params: #{table_params.inspect}"
     
     if table_params[:paginate] and table_params[:limit] and table_params[:pagination_page]
@@ -74,15 +74,18 @@ class TableQuery
     end
     #puts joins.inspect
     
+    select = "#{model.table_name}.*" + extra_select
+    #puts select
+
     items = model.find(:all,
-      :select => "#{model.table_name}.*" + extra_select,
+      :select => select,
       :order => sorter,
       :conditions => sql,
       :include => table_params[:include],
       :joins => joins,
       :limit => table_params[:limit] || false,
-      :offset => offset) 
-      
+      :offset => offset)
+
     # No limit/offset
     total = model.count(:all,
       :conditions => sql,

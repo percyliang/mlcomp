@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
 
-# Restart the server every night at 4am.
+# Restart the server every night at 4pm.
 while true
   lastRestartTime = Time.now
   puts "=== STARTING SERVER"
   pid = fork { exec(File.dirname($0)+'/../server', *ARGV) }
   while not Process.wait(pid, Process::WNOHANG)
+    #if Time.now.strftime("%S") == "04" && Time.now - lastRestartTime > 2
     # Restart around 4am and at least 20 hours after last restart
     if Time.now.strftime("%H") == "04" && Time.now - lastRestartTime > 20*60*60
       puts "=== KILLING SERVER"

@@ -50,6 +50,8 @@ ActionController::Routing::Routes.draw do |map|
   
   map.root :controller => "general_display", :action => "index"
   #map.root :controller => "general_display", :action => "front_page"
+  map.connect '/mlcomp-tool', :controller => 'general_display', :action => 'mlcomp_tool'
+  map.connect '/general.rb', :controller => 'general_display', :action => 'general_rb'
   
   map.connect ':controller/', :action => 'index'
   

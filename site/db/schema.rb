@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20101007183241) do
+ActiveRecord::Schema.define(:version => 20100726233641) do
 
   create_table "announcements", :force => true do |t|
     t.text     "serialized_message", :limit => 16777215
@@ -53,7 +53,6 @@ ActiveRecord::Schema.define(:version => 20101007183241) do
     t.string   "process_status"
     t.string   "url"
     t.string   "author"
-    t.float    "avg_stddev"
   end
 
   add_index "datasets", ["user_id"], :name => "index_datasets_on_user_id"
@@ -80,7 +79,6 @@ ActiveRecord::Schema.define(:version => 20101007183241) do
     t.string   "url"
     t.string   "language"
     t.boolean  "tuneable"
-    t.float    "avg_percentile"
   end
 
   add_index "programs", ["user_id"], :name => "index_programs_on_user_id"
@@ -148,7 +146,7 @@ ActiveRecord::Schema.define(:version => 20101007183241) do
 
   create_table "users", :force => true do |t|
     t.string   "username",       :limit => 30,                   :null => false
-    t.string   "password_hash",                                  :null => false
+    t.string   "password_hash",                :default => "",   :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "fullname"
@@ -184,7 +182,14 @@ ActiveRecord::Schema.define(:version => 20101007183241) do
     v.column :best_core_program_id
   end
 
-  create_view "pre_dataset_vresults", "select `datasets`.`id` AS `dataset_id`,count(`runs`.`id`) AS `num_runs`,`runs`.`id` AS `last_run_id`,min(`runs`.`error`) AS `min_error` from (`datasets` left join `runs` on((`datasets`.`id` = `runs`.`core_dataset_id`))) group by `datasets`.`id` order by `runs`.`updated_at` desc", :force => true do |v|
+  create_view "non_helper_runs", "select `runs`.`id` AS `id`,`runs`.`error` AS `error`,`runs`.`core_dataset_id` AS `core_dataset_id`,`runs`.`updated_at` AS `updated_at` from (`runs` join `programs` on((`runs`.`core_program_id` = `programs`.`id`))) where (isnull(`programs`.`is_helper`) or (`programs`.`is_helper` = 0))", :force => true do |v|
+    v.column :id
+    v.column :error
+    v.column :core_dataset_id
+    v.column :updated_at
+  end
+
+  create_view "pre_dataset_vresults", "select `datasets`.`id` AS `dataset_id`,count(`runs`.`id`) AS `num_runs`,`runs`.`id` AS `last_run_id`,min(`runs`.`error`) AS `min_error` from (`datasets` left join `non_helper_runs` `runs` on((`datasets`.`id` = `runs`.`core_dataset_id`))) group by `datasets`.`id` order by `runs`.`updated_at` desc", :force => true do |v|
     v.column :dataset_id
     v.column :num_runs
     v.column :last_run_id
@@ -197,7 +202,7 @@ ActiveRecord::Schema.define(:version => 20101007183241) do
     v.column :last_run_id
   end
 
-  create_view "user_vresults", "select `users`.`id` AS `user_id`,count(`runs`.`id`) AS `num_runs`,sum(`run_statuses`.`user_time`) AS `total_spent_time`,sum((`run_statuses`.`user_time` * (`run_statuses`.`updated_at` > (curtime() - ((5 * 60) * 60))))) AS `recent_spent_time` from (`users` join (`runs` join `run_statuses` on((`runs`.`id` = `run_statuses`.`run_id`))) on((`users`.`id` = `runs`.`user_id`))) group by `users`.`id`", :force => true do |v|
+  create_view "user_vresults", "select `users`.`id` AS `user_id`,count(`runs`.`id`) AS `num_runs`,sum(`run_statuses`.`real_time`) AS `total_spent_time`,sum((`run_statuses`.`real_time` * (`run_statuses`.`updated_at` > (now() - ((5 * 60) * 60))))) AS `recent_spent_time` from (`users` join (`runs` join `run_statuses` on((`runs`.`id` = `run_statuses`.`run_id`))) on((`users`.`id` = `runs`.`user_id`))) group by `users`.`id`", :force => true do |v|
     v.column :user_id
     v.column :num_runs
     v.column :total_spent_time

@@ -28,10 +28,17 @@
 			info_data << ["Total Time", Format.time(run.status.real_time)]
 			info_data << ["Max Memory Usage", Format.space(run.status.max_memory_usage)]
 		end -%>
-		<% fieldSpec = Domain.get(run.core_dataset[:format]).runFieldSpec
-		fieldSpec.names.each_with_index do |fspecname,i| 
-      info_data << ["<span title=\"#{fieldSpec.descriptions[i]}\">#{fspecname}</span>", fieldSpec.render(i, run.getSortField(i))]
-		end %>
+    <%
+      if run.core_dataset
+        domain = Domain.get(run.core_dataset[:format])
+        fieldSpec = domain.runFieldSpec
+        info_data << ["Domain:", domain.name]
+        fieldSpec.names.each_with_index do |fspecname,i| 
+          info_data << ["<span title=\"#{fieldSpec.descriptions[i]}\">#{fspecname}</span>", fieldSpec.render(i, run.getSortField(i))]
+        end
+      else
+        info_data << ["Domain:", 'none']
+      end %>
 
 		<table border="0" cellspacing="0" cellpadding="0" class="attribute_table">
 			<% info_data.each do |title,value| %>
