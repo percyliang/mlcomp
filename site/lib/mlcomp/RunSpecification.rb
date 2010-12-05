@@ -1,3 +1,19 @@
+# MLcomp: website for automatic and standarized execution of algorithms on datasets.
+# Copyright (C) 2010 by Percy Liang and Jake Abernethy
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 require 'mlcomp/Specification'
 
 # Specification for a run.
@@ -27,6 +43,12 @@ class RunSpecification < Specification
       if node.is_a?(Program)
         # Make sure constructor signature agree with the types of the arguments
         signature = (node.constructor_signature || "").split
+        if signature[-1] =~ /\*$/ # Means we can duplicate the last type 0 or more times until we have the same number of arguments as the child
+          extraType = signature.pop.sub(/\*$/, '')
+          while signature.size < children.size
+            signature << extraType
+          end
+        end
         if signature.size != children.size
           except.call("wanted #{signature.size} (#{node.constructor_signature}), but got #{children.size} arguments")
         end
