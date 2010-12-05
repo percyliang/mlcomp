@@ -103,7 +103,12 @@ class GeneralDisplayController < ApplicationController
       username = session[:user] ? session[:user].username : "anon"
       fullname = session[:user] ? session[:user].fullname : "anon"
       email = session[:user] ? session[:user].email : nil
-      Emailer.deliver_user_comment(username, fullname, email, comment, commenturl)
+      #
+      ## Following only works if Emailer is set up correctly in
+      ## environments.rb. Requires setting an outgoing server, etc.
+      ## Check the web for more details.
+      # 
+      # Emailer.deliver_user_comment(username, fullname, email, comment, commenturl)
     end
     render :update do |page|
       page.call "$('comment').clear"

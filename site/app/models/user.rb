@@ -83,7 +83,12 @@ class User < ActiveRecord::Base
   def create_reset_code
     reset_code = Digest::SHA1.hexdigest( Time.now.to_s.split(//).sort_by {rand}.join )
     if update_attribute(:reset_code, reset_code)
-      Emailer.deliver_reset_notification(self)
+      #
+      ## Following only works if Emailer is set up correctly in
+      ## environments.rb. Requires setting an outgoing server, etc.
+      ## Check the web for more details.
+      #
+      # Emailer.deliver_reset_notification(self)
     end
   end 
   

@@ -15,6 +15,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class Emailer < ActionMailer::Base
+  
+  # All of the settings here should probably be changed, these are the
+  # default emailer settings for mlcomp's live server
+  
   def user_comment(username, fullname, email, message, url, sent_at = Time.now)
     @subject = "User Comment from #{username} (#{fullname})"
     @recipients = ['mlcomp.support@gmail.com']
