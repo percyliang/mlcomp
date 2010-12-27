@@ -1,0 +1,14 @@
+--- 
+:email_configured: true
+:gmail_config_params: 
+  :port: 587
+  :authentication: :plain
+  :user_name: USERNAME@gmail.com
+  :password: PASSWORD
+  :address: smtp.gmail.com
+:twitter_configured: true
+:twitter_tokens: 
+  :consumer_secret: 0Dsa...
+  :access_secret: jDn3T...
+  :consumer_token: G5HO...
+  :access_token: 77085...
