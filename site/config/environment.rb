@@ -60,10 +60,38 @@ Rails::Initializer.run do |config|
   # config.active_record.default_timezone = :utc
 end
 
-require 'smtp_tls'
 
 require 'rubygems'
 require 'rails_sql_views'
+require 'yaml'
+
+site_params_file = RAILS_ROOT + "/config/mlcomp_site_params.yml"
+SITEPARAMS = {}
+if File.exists?(site_params_file)
+  SITEPARAMS = YAML::load File.read(site_params_file)
+end
+
+
+if SITEPARAMS[:email_configured]
+
+  # This is the code to send emails via gmail
+  
+  require 'smtp_tls'
+  
+  ActionMailer::Base.raise_delivery_errors = true
+  ActionMailer::Base.delivery_method = :smtp
+  ActionMailer::Base.smtp_settings = SITEPARAMS[:gmail_config_params]
+
+  # A typical configuration of ActionMailer::Base.smtp_settings is:
+  # {
+  #   :address => "smtp.gmail.com",
+  #   :port => 587,
+  #   :authentication => :plain,
+  #   :user_name => "mlcomp.support@gmail.com",
+  #   :password => ""
+  # }
+
+end
 
 class File
   def self.binary?(name)

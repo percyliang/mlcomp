@@ -190,4 +190,20 @@ class UsersController < ApplicationController
     end
     
   end
+  
+  def announcements
+
+    # This is code to send out mass announcements
+
+    if request.post?
+      subject = params[:email_subject]
+      body = params[:email_body]
+      recipients = User.find_all_by_receive_emails(true)
+      recipients.each do |user|
+        tmail_msg = AnnouncementEmailer.create_mass_announcement(user,subject,body)
+        Announcement.create_ann(user,"mass_email",tmail_msg)
+      end
+      flash[:notice] = "Prepared announcements for sending"
+    end
+  end
 end

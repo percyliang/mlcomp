@@ -14,17 +14,62 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Utilities for notifying (via email)
+# Utilities for notifying (via email or twitter)
+require 'yaml'
+require 'rubygems'
+require 'twitter' if SITEPARAMS[:twitter_configured]
+
 module Notification
+  
+  class Tweeter
+    
+    def initialize
+      if SITEPARAMS[:twitter_configured]
+        toks = SITEPARAMS[:twitter_tokens]
+        oauth = Twitter::OAuth.new(toks[:consumer_token], toks[:consumer_secret])
+        oauth.authorize_from_access(toks[:access_token],toks[:access_secret])
+        @client = Twitter::Base.new(oauth)
+      end
+    end
+    
+    def tweet msg
+      if SITEPARAMS[:twitter_configured]
+        @client.update(msg)
+      end
+    end
+    
+  end
+  
+  TW = Tweeter.new
+  
+  def self.notify_tweet_and_email(options)
+    self.notify_tweet(options)
+    self.notify_email(options)
+  end
+  
+  def self.notify_tweet(options)
+    if SITEPARAMS[:twitter_configured]
+      message = options[:message] or raise "Missing message"
+      message = "[#{Format.datetime(Time.now)}] #{message}" # Need time so we can post two of the same message
+      TW.tweet(message)
+    end
+  end
+
+  # def self.tweet(options)
+  #   # DOESN'T WORK: TODO: FIX!
+  #   username = options[:username] or raise "Missing username"
+  #   password = options[:password] or raise "Missing password"
+  #   message = options[:message] or raise "Missing message"
+  #   args = ['curl', '-u', "#{username}:#{password}", '-d', "status=#{message}", 'http://twitter.com/statuses/update.xml']
+  #   #log "Executing: #{args.inspect}"
+  #   systemOrFail(*args)
+  # end
+  
   def self.notify_email(options)
-    # TODO: actual send email
-    log "SENDING EMAIL: #{options.inspect}"
-    #
-    ## Following only works if Emailer is set up correctly in
-    ## environments.rb. Requires setting an outgoing server, etc.
-    ## Check the web for more details.
-    #
-    # Emailer.deliver_general_email(options[:subject], options[:message])
+    if SITEPARAMS[:email_configured]
+      log "SENDING EMAIL: #{options.inspect}"
+      Emailer.deliver_general_email(options[:subject], options[:message])
+    end
   end
 
   def self.notify_event(options)
