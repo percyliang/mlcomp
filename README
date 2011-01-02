@@ -51,7 +51,6 @@ NOTE: always source the rc file (run . ./rc in bash) before running any of the f
   ./run-master [-local] # Starts the run master (communicates with workers to run jobs)
   cd worker && ./worker -server localhost # Starts up a worker
   ./run-stats # Starts a process that computes general statistics and updates the database (optional)
-  ./run-command-server # Starts up a server that the command-line utility mlcomp-tool talks to (optional)
 
 ### Relevant directories
 # ./site: where the Rails webserver and code reside

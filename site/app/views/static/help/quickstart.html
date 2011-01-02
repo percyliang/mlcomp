@@ -3,7 +3,7 @@
 <p>This section will step you through how to upload a simple program and a small dataset,
 and run the program on the dataset.</p>
 
-<p>First, signup for an account on MLcomp.  This will enable you to create datasets and programs.</p>
+<p>First, signup for an account on mlcomp.  This will enable you to create datasets and programs.</p>
 
 <h3><a name="createDataset"></a>Create a dataset</h3>
 
@@ -36,15 +36,13 @@ name: simple-dataset
 description: a toy dataset for testing purposes.
 format: MulticlassClassification
 </pre>
-The <tt>name</tt> uniquely identifies this dataset on MLcomp (when you upload it, you might have to use
+The <tt>name</tt> uniquely identifies this dataset on mlcomp (when you upload it, you might have to use
 a different name if <tt>simple-dataset</tt> is taken).
 The <tt>format</tt> specifies the format of the dataset and which programs can be run on it;
 there are other standard <a href="#datasetFormats">dataset formats</a>.
-Now the dataset should be successfully saved into MLcomp.</p>
+Now the dataset should be successfully saved into mlcomp.</p>
 
-<p>Initially the dataset will be <em>unprocessed</em>; after a minute or so
-(possibly shorter depending on our load and the size of the dataset), refresh
-the page, and its status should have changed to <em>processed</em>,
+<p>Initially the dataset will be <em>unprocessed</em>; after a few moments, its status should change to <em>processed</em>,
 which means that it has been validated and that the data has been divided into a training set and a test set.
 Only after it has been processed can programs be run on it.
 </p>
@@ -68,7 +66,7 @@ The operations are as follows:
   <li>
     The <tt>learn</tt> operation takes a file containing the training data
     of the <tt>Multiclass</tt> dataset format described <a href="#createDataset">above</a>.
-    Invoking this operation (done by MLcomp) produces the following result:
+    Invoking this operation (done by mlcomp) produces the following result:
 <pre>
 % ./run learn path/to/trainingExamples
 Processing training examples...
@@ -114,9 +112,9 @@ name: simple-naive-bayes
 description: A Simple Naive Bayes implementation in Ruby.
 task: MulticlassClassification
 </pre>
-The <tt>name</tt> must uniquely identify the program in the MLcomp system (when you upload it, you might have to use
+The <tt>name</tt> must uniquely identify the program in the mlcomp system (when you upload it, you might have to use
 a different name if <tt>simple-naive-bayes</tt> is taken).
-The task <tt>MulticlassClassification</tt> tells MLcomp which datasets can be run on the program
+The task <tt>MulticlassClassification</tt> tells mlcomp which datasets can be run on the program
 and how to evaluate the program; there are other standard <a href="#taskTypes">task types</a>.</p>
 
 <p>As for datasets, one can upload a single zip file containing a 
@@ -134,6 +132,10 @@ and <tt>simple-dataset</tt> under the datasets.
 It will prompt you if you want to tune the hyperparameter; check yes because
 our program supports different hyperparameters.
 Upon adding the run, the program will be added to the queue for running.
-Click on the run to go to the page for that run and to monitor its progress.
-After a short while, the status will change from Queued to Running to Success.
-You can download the results of the run if you'd like.
+It will be run on one of our worker servers (or one that <a href="#workers">you might provide</a>).
+You can then inspect the training and test times and error rates of this run.</p>
+
+<p>Each run will be run in a virtual machine (see <a
+href="#virtualmachine">below</a> for information about the system
+specifications</a>).  By default, your program is allotteded 1GB of ram and one
+hour of computation time.</p>
