@@ -1,0 +1,234 @@
+#!/usr/bin/ruby
+
+# MLcomp tool for doing MLcomp things programatically.
+# Currently, you can either create simple runs (program + dataset) or generic runs (any run specification).
+# The latter is not possible on the website.
+# Requires Ruby 1.8.6 or higher.
+# Version 1.1: last updated 12/04/10
+
+$usage = <<EOF
+Usage:
+  mlcomp-tool -login # Will prompt you for your MLcomp username/password and
+                     # save a session handle (to ~/.mlcomprc) which will authenticate you for future commands.
+  mlcomp-tool -run <program ID or name> <dataset ID or name> [<tuneHyperparameters or not>] # Create a simple run
+  mlcomp-tool -run <file with the run specification> # Create a generic run
+EOF
+
+# Example of a run specification file (YAML):
+"""
+- program:supervised-learning
+-
+  - program:one-vs-all
+  - program:svmlight-linear
+- dataset:wine
+- program:multiclass-utils
+- program:classification-evaluator
+"""
+
+require 'xmlrpc/client'
+require 'yaml'
+
+def prompt(promptStr, hidden=false)
+  print promptStr
+  system "stty -echo" if hidden
+  line = gets
+  system "stty echo" if hidden
+  puts if hidden
+  line.chomp
+end
+
+class MLcompTool
+  def initialize(args)
+    @confPath, @verbose, serverHost, serverPort, handle, login, run = extractArgs(:args => args, :spec => [
+      ['conf', String, ENV['HOME']+'/.mlcomprc'],
+      ['verbose', Fixnum, 0],
+      ['serverHost', String],
+      ['serverPort', Fixnum],
+      ['handle', String],
+      ['login', TrueClass],
+      ['run', [String]],
+    nil])
+
+    @conf = {}
+    @conf = YAML::load(File.read(@confPath)) if File.exists?(@confPath)
+    @conf['serverHost'] ||= 'mlcomp.org'
+    @conf['serverPort'] ||= 7001
+
+    @conf['serverHost'] = serverHost if serverHost
+    @conf['serverPort'] = serverPort if serverPort
+    @conf['handle'] = handle if handle
+
+    if login
+      username = prompt("MLcomp username: ")
+      password = prompt("MLcomp password: ", true)
+      response = makeCall('Login', username, password)
+      @conf['handle'] = response['handle']
+    end
+
+    if run
+      handle = @conf['handle']
+      if not handle
+        puts "You don't have a handle; please login first"
+        exit 1
+      end
+
+      if run.size == 2
+        postRun(makeCall("CreateSimpleRun", handle, run[0], run[1], false))
+      elsif run.size == 3
+        postRun(makeCall("CreateSimpleRun", handle, *run))
+      elsif run.size == 1
+        path = run[0]
+        if not File.exists?(path)
+          puts "Path #{path} doesn't exist"
+          exit 1
+        end
+        descriptionTree = nil
+        begin
+          descriptionTree = YAML::load(File.read(path))
+        rescue Exception => e
+          puts "#{path} contains invalid YAML file: #{e}"
+          exit 1
+        end
+        #puts descriptionTree.inspect
+        postRun(makeCall("CreateGenericRun", handle, YAML::dump(descriptionTree)))
+      else
+        puts "Wrong number of arguments: #{run.size}"
+      end
+    end
+
+    # Save configuration
+    f = open(@confPath, "w")
+    f.puts YAML::dump(@conf)
+    f.close
+  end
+
+  def postRun(response)
+    puts "http://#{@conf['serverHost']}/runs/#{response['runId']}"
+  end
+
+  def makeCall(*args)
+    #puts args.inspect
+    connect unless @server
+    response = @server.call(*args)
+    puts response['message'] if response['message']
+    exit 1 if not response['success']
+    response
+  end
+
+  def connect
+    host = @conf['serverHost']
+    port = @conf['serverPort']
+    puts "Connecting to #{host}:#{port}..."
+    @server = XMLRPC::Client.new(host, "/", port, nil, nil, nil, nil, nil, 600)
+  end
+end
+
+############################################################
+# Copied from args.rb
+# Simple way to process command-line arguments
+# Return [value1, ... valueK]; modifies args
+# If remove, we remove the used arguments from args.
+# Each element of names is either a string name
+# or a tuple [name, type, default value, required].
+def extractArgs(options)
+  d = lambda { |x,y| x != nil ? x : y }
+  args = options[:args] || ARGV
+  remove = d.call(options[:remove], true)
+  spec = options[:spec] || []
+  recognizeAllOpts = d.call(options[:recognizeAllOpts], true)
+
+  arr = lambda { |x| x.is_a?(Array) ? x : [x] }
+  spec = spec.compact.map { |x| arr.call(x) }
+  names = spec.map { |x| x[0] }
+  types = spec.map { |x| x[1] || String }
+  values = spec.map { |x| x[2] != nil ? arr.call(x[2]) : nil } # Default values, to be replaced
+  requireds = spec.map { |x| x[3] }
+
+  # Print help?
+  args.each { |arg|
+    if arg == '-help'
+      puts 'Usage:'
+      spec.each { |name,type,value,required|
+        puts "  -#{name}: #{type} [#{value}]#{required ? ' (required)' : ''}"
+      }
+    end
+  }
+  
+  newArgs = [] # Store the arguments that we don't remove
+  i = nil
+  verbatim = false
+  args.each { |arg|
+    if arg == '--' then
+      verbatim = true
+    elsif (not verbatim) && arg =~ /^-(.+)$/ then
+      x = $1
+      #i = names.index($1)
+      # If $1 is the prefix of exactly one name in names, then use that
+      matchi = names.map_with_index { |name,j| name =~ /^#{x}/ ? j : nil }.compact
+      if recognizeAllOpts then
+        if matchi.size == 0
+          puts "No match for -#{x}"
+          exit 1
+        elsif matchi.size > 1
+          puts "-#{x} is ambiguous; possible matches: "+matchi.map{|i| "-"+names[i]}.join(' ')
+          exit 1
+        end
+      end
+      i = (matchi.size == 1 ? matchi[0] : nil)
+
+      values[i] = [] if i
+      verbatim = false
+    else
+      values[i] << arg if i
+      verbatim = false
+    end
+    newArgs << arg unless remove && i
+  }
+  args.clear
+  newArgs.each { |arg| args << arg }
+
+  (0...names.size).each { |i|
+    if requireds[i] && (not values[i]) then
+      puts "Missing required argument: -#{names[i]}"
+      exit 1
+    end
+  }
+
+  # Interpret values according to the types
+  values.each_index { |i|
+    next if values[i] == nil
+    t = types[i]
+       if t == String    then values[i] = values[i].join(' ')
+    elsif t == Fixnum    then values[i] = values[i][0].to_i
+    elsif t == Float     then values[i] = values[i][0].to_f
+    elsif t == TrueClass then values[i] = (values[i].size == 0 || values[i][0].to_s == 'true')
+    elsif t.is_a?(Array) then
+      t = t[0]
+         if t == String    then values[i] = values[i]
+      elsif t == Fixnum    then values[i] = values[i].map { |x| x.to_i }
+      elsif t == Float     then values[i] = values[i].map { |x| x.to_f }
+      elsif t == TrueClass then values[i] = values[i].map { |x| x == 'true' }
+      else "Unknown type: '#{types[i][0]}'"
+      end
+    else raise "Unknown type: '#{types[i]}'"
+    end
+  }
+
+  values
+end
+
+class Array
+  def map_with_index
+    a = []
+    each_with_index { |x,i| a << yield(x, i) }
+    a
+  end
+end
+
+############################################################
+
+if ARGV.size == 0
+  puts $usage
+  exit 1
+end
+MLcompTool.new(ARGV)
