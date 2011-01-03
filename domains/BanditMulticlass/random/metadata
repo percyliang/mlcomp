@@ -1,0 +1,4 @@
+name: bandit-random
+construct:
+task: BanditMulticlass
+description: Guess labels at random.

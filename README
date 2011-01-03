@@ -48,7 +48,7 @@ NOTE: always source the rc file (run . ./rc in bash) before running any of the f
 
 ### To run MLcomp, start the following processes (in different terminals):
   ./run-server # Starts the Rails web server (on port 3000 by default)
-  ./run-master # Starts the run master (communicates with workers to run jobs)
+  ./run-master [-local] # Starts the run master (communicates with workers to run jobs)
   cd worker && ./worker -server localhost # Starts up a worker
   ./run-stats # Starts a process that computes general statistics and updates the database (optional)
   ./run-command-server # Starts up a server that the command-line utility mlcomp-tool talks to (optional)

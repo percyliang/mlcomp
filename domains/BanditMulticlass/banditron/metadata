@@ -1,0 +1,4 @@
+name: banditron
+construct:
+task: BanditMulticlass
+description: An implementation of the Banditron algorithm presented in "Efficient Bandit Algorithms for Online Multiclass Prediction" by Sham M. Kakade, Shai Shalev-Shwartz and Ambuj Tewari, in ICML, 2008.

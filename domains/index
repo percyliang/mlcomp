@@ -6,4 +6,5 @@
 - DocumentClassification
 - WordSegmentation
 - OnlineLearningMulticlass
+- BanditMulticlass
 - SemiSupervisedMulticlass

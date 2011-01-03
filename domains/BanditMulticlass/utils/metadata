@@ -1,0 +1,3 @@
+name: bandit-multiclass-utils
+description: Inspects BanditMulticlass datasets and evaluates BanditMulticlass performance.
+task: Inspect Interact Evaluate

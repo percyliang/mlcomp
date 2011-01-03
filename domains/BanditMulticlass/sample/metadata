@@ -1,0 +1,3 @@
+name: bandit-multiclass-sample
+format: BanditMulticlass
+description: Sample dataset for sanity checking.

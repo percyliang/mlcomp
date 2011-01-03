@@ -1,0 +1,17 @@
+#! /usr/bin/env python2
+import sys, random
+
+if len(sys.argv) < 2:
+    print >>sys.stderr, "USAGE: %s construct OR %s interact <num_labels>\n" % (sys.argv[0], sys.argv[0])
+    sys.exit(1)
+if sys.argv[0] == 'construct':
+    sys.exit(0) 
+if sys.argv[1] == 'interact':
+  num_labels = int(sys.argv[2])
+  line = sys.stdin.readline() # features
+  while line:
+      label = random.randint(1, num_labels)
+      sys.stdout.write("%d\n" % label)
+      sys.stdout.flush()
+      line = sys.stdin.readline() # oracle
+      line = sys.stdin.readline() # features
