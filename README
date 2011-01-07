@@ -16,7 +16,7 @@ NOTE: always source the rc file (run . ./rc in bash) before running any of the f
 # 2) rubygems, rake, and libopenssl-ruby
 # 3) mysql -- the client AND server, with root access to the server
 #
-# On debian, these can be installed with the following command, but check the ruby version:
+# On Debian, these can be installed with the following command, but check the Ruby version:
 
   sudo apt-get install mysql-server rake rubygems libopenssl-ruby # (for Debian)
 
@@ -67,3 +67,6 @@ NOTE: always source the rc file (run . ./rc in bash) before running any of the f
 ### Handy database commands
   mysql -u rails_user mlcomp_development # inspect it
   mysqldump -u rails_user mlcomp_development > mlcomp_development.backup # dump contents
+
+### On Fedora (which is what mlcomp.org currently uses on EC2), we need the following packages:
+  yum install ruby-devel.i386 gcc g++ PyYAML

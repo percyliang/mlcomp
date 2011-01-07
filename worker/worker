@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
 # This is the MLcomp worker: contacts the master for runs to perform.
-# Last updated 10/06/10.
+# Last updated 01/07/11.
 
 # MLcomp: website for automatic and standarized execution of algorithms on datasets.
 # Copyright (C) 2010 by Percy Liang and Jake Abernethy
@@ -131,7 +131,8 @@ class Worker
   def connect
     @mutex.synchronize {
       puts "Connecting to #{@serverHost}:#{@serverPort}..."
-      @server = XMLRPC::Client.new(@serverHost, "/", @serverPort, nil, nil, nil, nil, nil, 600)
+      @server = XMLRPC::Client.new(@serverHost, "/", @serverPort)
+      @server.timeout = 600
     }
   end
 
@@ -198,17 +199,18 @@ class Worker
   def call(*args)
     puts "server.call: #{args[0]}" if @verbose >= 2
     response = nil
-    @mutex.synchronize {
-      (0...3).each {
-        begin
+    (0...5).each {
+      begin
+        @mutex.synchronize {
           response = @server.call(*args)
-          break if response.is_a?(Hash)
-          puts "ERROR: got non-Hash response: "+response.inspect
-        rescue Exception => e
-          puts "ERROR calling #{args.inspect}, trying again..."
-          puts "#{e.message}\n#{e.backtrace.join("\n")}"
-        end
-      }
+        }
+        break if response.is_a?(Hash)
+        puts "ERROR: got non-Hash response: "+response.inspect
+      rescue Exception => e
+        puts "ERROR calling #{args.inspect}, trying again..."
+        puts "#{e.message}\n#{e.backtrace.join("\n")}"
+        connect
+      end
     }
     response
   end
