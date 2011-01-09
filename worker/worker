@@ -124,6 +124,7 @@ class Worker
       puts response['message']
     else
       startMonitorThread
+      sleep 1 # Wait for monitor thread to do send status - so we can update version
       performJobsLoop
     end
   end
