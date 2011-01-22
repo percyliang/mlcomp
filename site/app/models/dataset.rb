@@ -195,7 +195,11 @@ class Dataset < ActiveRecord::Base
 
   # Save or throw an exception
   def saveOrRaise(validate)
-    raise DatasetException.new("Unable to save dataset #{self.id}: #{errors.full_messages.join('; ')}") if not save(validate)
+    begin
+      raise DatasetException.new("Unable to save dataset #{self.id}: #{errors.full_messages.join('; ')}") if not save(validate)
+    rescue Exception => e
+      raise DatasetException.new("Unable to save dataset #{self.id}: #{e}")
+    end
   end
 
   # Create a table params object for displaying datasets
