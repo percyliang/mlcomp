@@ -341,7 +341,11 @@ class Run < ActiveRecord::Base
       self.processed_dataset.process_status = success ? "success" : "failed"
       self.processed_dataset.result = YAML.dump(map)
       self.processed_dataset.setSortFields
-      self.processed_dataset.saveOrRaise(true)
+      begin
+        self.processed_dataset.saveOrRaise(true)
+      rescue Exception => e
+        success = false
+      end
     end
 
     # Update status
