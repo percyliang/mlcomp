@@ -27,7 +27,7 @@ NOTE: always source the rc file (run . ./rc in bash) before running any of the f
   gem install -v=2.1.1 rails
   gem install json
   gem install rails_sql_views-0.7.0.gem
-
+  gem install mysql
 
 # It'll be useful to set up your ssh keys so that you can ssh into localhost 
 # (or wherever the worker is running) without typing a password.
@@ -68,4 +68,4 @@ NOTE: always source the rc file (run . ./rc in bash) before running any of the f
   mysqldump -u rails_user mlcomp_development > mlcomp_development.backup # dump contents
 
 ### On Fedora (which is what mlcomp.org currently uses on EC2), we need the following packages:
-  yum install ruby-devel.i386 gcc g++ PyYAML
+  yum install ruby-devel.i386 mysql-devel.i386 gcc g++ PyYAML
