@@ -53,10 +53,17 @@
          links << ['Users','users'] if isadmin
          links << ['Workers','workers'] if isadmin
          links << ['Help', 'faq']
-         links << ['About Us', 'help/about_us.html', 'static']
+         links << ['About Us', 'help/about_us.html']
+
+         currPath = params[:controller] == 'static' ? params[:path] : [params[:controller]] # Path of the current page
+
          links.each do |link| %>
        <li>
-         <% html_options = params[:controller] == (link[2] || link[1]) ? {:class => 'current_view'} : {} %>
+       <%
+         linkPath = link[1].split(/\//)
+         match = linkPath == currPath[0...linkPath.size] # the linkPath is a prefix of the current path
+         html_options = match ? {:class => 'current_view'} : {}
+       %>
          <%= link_to link[0], {:controller => link[1], :action => 'index'}, html_options %>
        </li>
       <% end %>
