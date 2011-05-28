@@ -1,7 +1,7 @@
 <h3></a>Run Environment</h3>
 
 All programs are run in the cloud on a standard Linux distribution,
-specifically, an <a href="http://aws.amazon.com/ec2">Amazon EC2 machine</a>
+specifically, a 32-bit <a href="http://aws.amazon.com/ec2">Amazon EC2 machine</a>
 running Fedora Release 8 Linux (kernel 2.6.21).
 The table below shows the following packages installed by default.
 Let us know if you would like us to install additional packages.
@@ -20,6 +20,12 @@ Let us know if you would like us to install additional packages.
   <tr><td>guile     </td><td>1.8.5-1        </td></tr>
   <tr><td>Ocaml     </td><td>3.10.0-8       </td></tr>
 </table>
+
+<p>
+numpy and scipy are pre-installed for Python.  If your program requires
+libraries that we do not have installed, consider using the <a
+  href="http://www.stanford.edu/~pgbovine/cde.html">CDE tool</a>.
+See <a href="http://mlcomp.org/programs/894">the demo program</a> for more information.
 
 <p>
 Your program may use up to 1.5GB of memory, run for at most 24 hours, use up to

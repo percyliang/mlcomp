@@ -205,6 +205,12 @@
   - datasets/new
   question: Is my dataset available for download by anyone?
 - answer: |-
+    Currently, programs (when zipped) can be no larger than 200MB.
+  tags: 
+  - section_programs
+  - programs/new
+  question: How big can my program be?
+- answer: |-
     Currently, datasets (when zipped) can be no larger than 200MB.
   tags: 
   - section_datasets
@@ -248,6 +254,15 @@
   tags: 
   - section_runs
   question: I started a run, now where do I find it?
+- answer: |-
+    You can use the <a href="http://www.stanford.edu/~pgbovine/cde.html">CDE tool</a>,
+    which can automatically package all the libraries you need to run your program.
+    You can then upload the entire self-contained package onto MLcomp.
+    See <a href="http://mlcomp.org/programs/894">the demo program</a> for more information.
+  tags: 
+  - section_programs
+  - programs/new
+  question: What if my program requires custom libraries?
 - answer: |-
     All runs are executed on Amazon's EC2 cloud-computing infrastructure on a standard Linux distribution.
     <a href="/help/worker_info.html">More information here</a>.
