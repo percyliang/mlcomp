@@ -52,21 +52,26 @@
 			   #links << ['Runs', 'runs']
          links << ['Users','users'] if isadmin
          links << ['Workers','workers'] if isadmin
-         links << ['Help', 'faq']
+         links << ['Help', 'faq', 'help']
          links << ['About Us', 'help/about_us.html']
 
          currPath = params[:controller] == 'static' ? params[:path] : [params[:controller]] # Path of the current page
 
-         links.each do |link| %>
-       <li>
-       <%
-         linkPath = link[1].split(/\//)
-         match = linkPath == currPath[0...linkPath.size] # the linkPath is a prefix of the current path
-         html_options = match ? {:class => 'current_view'} : {}
-       %>
-         <%= link_to link[0], {:controller => link[1], :action => 'index'}, html_options %>
-       </li>
-      <% end %>
+         # Which link is highlighted?
+         matchLengths = links.map { |link|
+           link[1..-1].map { |l|
+             linkPath = l.split(/\//)
+             linkPath == currPath[0...linkPath.size] ? linkPath.size : 0 # the linkPath is a prefix of the current path
+           }.max
+         }
+         match_i = matchLengths.max == 0 ? -1 : matchLengths.map_with_index{|len,i| [len,i]}.max[1] # argmax
+
+         links.each_with_index do |link,i| %>
+           <li>
+           <% html_options = (i == match_i) ? {:class => 'current_view'} : {} %>
+           <%= link_to link[0], {:controller => link[1], :action => 'index'}, html_options %>
+           </li>
+         <% end %>
     </ul>
 
     <% if not session[:user].nil? %>
