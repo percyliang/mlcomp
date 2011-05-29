@@ -3,7 +3,8 @@ kind: supervised-learning
 taskDescription: |-
   The goal of this task is to learn how to classify text documents as one of K classes.
 datasetDescription: |-
-  The datashard is a directory consisting of one directory for each class,
+  A dataset consists of one or more datashards, where
+  each datashard (e.g., train, test, or raw) is a directory consisting of one directory per class,
   which in turn contains one file for each document.
   All the file names must be distinct.
   An example of the directory layout inside the datashard:
@@ -13,15 +14,15 @@ datasetDescription: |-
   label2/doc3
   ...
   </pre>
-  The test datashard consists of hte following layout:
+  At test time, your program will be passed unlabeled examples, which are arranged in a datashard like this:
   <pre>
   unlabeled/doc1
   unlabeled/doc2
   unlabeled/doc3
   ...
   </pre>
-  Predictions should be written to a directory with the following structure,
-  where each file can be empty (only the name matters).
+  Your predictions should be written to a directory with the following structure,
+  where each file can be empty (only the file name matters).
   <pre>
   label1/doc1
   label1/doc2
