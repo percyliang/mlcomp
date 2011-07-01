@@ -67,5 +67,9 @@ NOTE: always source the rc file (run . ./rc in bash) before running any of the f
   mysql -u rails_user mlcomp_development # inspect it
   mysqldump -u rails_user mlcomp_development > mlcomp_development.backup # dump contents
 
-### On Fedora (which is what mlcomp.org currently uses on EC2), we need the following packages:
+### On Fedora (which is what the mlcomp.org master currently uses on EC2), we need the following packages:
   yum install ruby-devel.i386 mysql-devel.i386 gcc g++ PyYAML
+
+### On Debian (which is what the workers use):
+  apt-get install g++ mono-runtime ruby r-base-core octave3.2 clisp guile-1.8 ocaml ghc6 python-numpy python-scipy
+  Also install Java 1.7 and Scala 2.9.
