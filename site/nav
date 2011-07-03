@@ -96,6 +96,7 @@
 ./lib/mlcomp/Constants.rb
 ./lib/mlcomp/DatasetInfo.rb
 ./lib/mlcomp/Domain.rb
+./lib/mlcomp/EC2Manager.rb
 ./lib/mlcomp/Exceptions.rb
 ./lib/mlcomp/FieldSpec.rb
 ./lib/mlcomp/GenericRunInfo.rb

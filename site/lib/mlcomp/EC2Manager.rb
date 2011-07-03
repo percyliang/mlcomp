@@ -11,12 +11,12 @@ class EC2Manager
     manager.loop
   end
 
-  #def clearKeys
-  #  # Get rid of stale keys (just get rid of all of them)
-  #  path = ENV['HOME']+'/.ssh/known_hosts'
-  #  puts "Removing #{path}"
-  #  File.delete(path) if File.exists?(path)
-  #end
+  def clearKeys
+    # Get rid of stale keys (just get rid of all of them)
+    path = ENV['HOME']+'/.ssh/known_hosts'
+    puts "Removing #{path}"
+    File.delete(path) if File.exists?(path)
+  end
 
   def systemAndLog(cmd, numAttempts=1)
     log "RUNNING: #{cmd}"
@@ -28,7 +28,7 @@ class EC2Manager
       else
         log "FAILED #{cmd}, waiting #{waitTime} second before trying again..."
         sleep waitTime
-        #clearKeys
+        clearKeys
         systemAndLog(cmd, numAttempts-1)
       end
     end
@@ -172,7 +172,7 @@ class EC2Manager
       end
       log "checkIfShouldStart: Instance #{instance_id} is ready on #{host}"
 
-      #clearKeys
+      clearKeys
 
       log "checkIfShouldStart: Copying files to worker"
       begin
