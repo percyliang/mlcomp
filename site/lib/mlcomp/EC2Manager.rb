@@ -196,7 +196,7 @@ class EC2Manager
       @lastStartedTime = Time.now.to_i
 
       log "checkIfShouldStart: Starting actual worker #{instance_id}"
-      systemAndLog("ssh #{host} 'cd worker && (./worker >& worker.log &)'")
+      systemAndLog("ssh -o StrictHostKeyChecking=no #{host} 'cd worker && (./worker >& worker.log &)'")
       log "checkIfShouldStart: Done starting worker #{instance_id}"
       printDivider
       log
