@@ -276,7 +276,8 @@ class Run < ActiveRecord::Base
       ['ln -sf program0/status &&'] +
       ["cd `dirname $0` && time ("] +
       commands.map { |cmd| "  #{cmd};" } +
-      [") < /dev/null > log 2>&1"]
+      [") > log 2>&1"]
+      #[") < /dev/null > log 2>&1"] # {07/05/11} piping /dev/null eats up the exit code for some reason (found this running on collaborativefiltering-sample)
       #[") < /dev/null 2>&1 | tee log"] # Can't use this because we need the exit code of the command and tee eats that up
     )
     systemOrFail('chmod', '+x', self.path+'/'+scriptName)
