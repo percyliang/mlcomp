@@ -122,7 +122,7 @@ class EC2Manager
     end
 
     # Theoretical number (cases were some workers not responsive for a while, and some runs have crashed and are still marked running)
-    numFreeWorkers = numWorkers - Run.countByStatus('running')
+    numFreeWorkers = [numWorkers - Run.countByStatus('running'), 0].max # Some could be falsely running
 
     if numWorkers == 0 # If no workers, don't ever wait to start one!
       numReadyRuns = Run.count(:all, :include => :status, :conditions => ['run_statuses.status = (?)', 'ready'])
