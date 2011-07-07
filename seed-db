@@ -7,5 +7,7 @@ def add(s)
 end
 
 # Recursively add everything
-add('domains/core')
+#add('domains/core')
+#add('domains/flat')
+#add('domains/*/utils')
 add('domains')

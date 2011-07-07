@@ -19,7 +19,7 @@
 # to the database without going through the web interface.
 class ResourceManager
   def initialize(*args)
-    @pretend, @useZipFiles, @replaceFiles, @allowRepeatRuns, username, addArgs, deleteArgs, listArgs, killArgs, processArgs, =
+    @pretend, @useZipFiles, @replaceFiles, @allowRepeatRuns, username, addArgs, deleteArgs, listArgs, killArgs, rerunArgs, processArgs, =
         extractArgs(:args => args, :spec => [
       ['pretend', TrueClass, false],
       ['useZipFiles', TrueClass, false],
@@ -30,6 +30,7 @@ class ResourceManager
       ['delete', [String], []],
       ['list', [String], []],
       ['kill', [String], []],
+      ['rerun', [String], []],
       ['process', [String], []],
     nil])
     #puts "ResourceManager: #{args.join(' ')}"
@@ -38,6 +39,7 @@ class ResourceManager
     deleteArgs.each { |arg| delete(arg) }
     listArgs.each { |arg| list(arg) }
     killArgs.each { |arg| kill(arg) }
+    rerunArgs.each { |arg| rerun(arg) }
     processArgs.each { |arg| process(arg) }
   end
 
@@ -295,6 +297,17 @@ class ResourceManager
       end
     }
   end
+  def rerun(arg)
+    find(Run, arg, nil) { |r|
+      w = r.worker 
+      if w
+        log "ERROR: run #{r} already running on worker #{w.id} (on #{w.host}), skipping..."
+        next
+      end
+      r.status.status = 'ready'
+      r.status.save
+    }
+  end
 
   # Process a program or dataset
   def process(arg)
@@ -330,7 +343,7 @@ class ResourceManager
       puts "  Adds a supervised learning run with this pair (* means all)"
       puts "#{script} (-delete|-list) (dataset|program|run|user|worker):(*|<id>|<name>|<handle>|<field>=<value>|oldRepeats) ..."
       puts "  Example of field/value: run:program=simple-naive-bayes OR run:status=running"
-      puts "#{script} -kill <run id> ..."
+      puts "#{script} (-kill|-rerun) <run id> ..."
       puts "#{script} -process <dataset name> ..."
       puts "#{script} checkDomains"
       puts "#{script} validateState"
