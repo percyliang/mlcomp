@@ -89,7 +89,11 @@ class Run < ActiveRecord::Base
     Constants::RUNS_DEFAULT_BASE_PATH + "/#{self.id}"
   end
 
-  def name; "(#{self.info.coreProgram.name},#{self.info.coreDataset.name})" end
+  def name
+    programName = self.info.coreProgram && self.info.coreProgram.name
+    datasetName = self.info.coreDataset && self.info.coreDataset.name
+    "(#{programName},#{datasetName})"
+  end
 
   # Had hyperparameter tuning done
   def tuneHyperparameters

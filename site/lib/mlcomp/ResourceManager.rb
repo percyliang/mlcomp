@@ -268,10 +268,7 @@ class ResourceManager
             others = Run.findAllByInfoSpec(r.info_spec)
             rr = others.find { |rr| rr.id > r.id }
             if rr
-              info = r.info
-              programName = info.coreProgram && info.coreProgram.name
-              datasetName = info.coreDataset && info.coreDataset.name
-              $stderr.puts "Run #{r.id} is older than #{rr.id} and has same info spec (#{programName},#{datasetName})"
+              $stderr.puts "Run #{r.id} is older than #{rr.id} and has same info spec (#{r.name})"
               op.call('run', r)
             end
           }
