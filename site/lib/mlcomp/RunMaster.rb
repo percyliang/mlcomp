@@ -42,11 +42,7 @@ class RunMaster
       if [ProgramException, DatasetException, RunException, WorkerException].find { |t| e.is_a?(t) } then
         failedResponse(e.message) # Benign failure
       else
-        begin
-          Notification::notify_error(:message => "RunMaster exception: #{e.message}")
-        rescue Exception => e
-          log "ERROR TRYING TO REPORT ERROR!"
-        end
+        Notification::notify_error(:message => "RunMaster exception: #{e.message}")
         @server.shutdown # This is really bad - we just get out of here (master will be restarted)
       end
     end

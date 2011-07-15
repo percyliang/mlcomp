@@ -68,7 +68,11 @@ module Notification
   def self.notify_email(options)
     if SITEPARAMS[:email_configured]
       log "SENDING EMAIL: #{options.inspect}"
-      Emailer.deliver_general_email(options[:subject], options[:message])
+      begin
+        Emailer.deliver_general_email(options[:subject], options[:message])
+      rescue Exception => e
+        log "ERROR SENDING EMAIL!"
+      end
     end
   end
 
