@@ -106,7 +106,25 @@ class RunMaster
     end
   end
 
-  def copyContents(source, dest)
+  def systemAndLog(cmdArgs, numAttempts=1)
+    cmd = cmdArgs.join(' ')
+    log "RUNNING: #{cmd}"
+    waitTime = 10
+    if not system(*cmdArgs)
+      if numAttempts <= 1
+        Notification.notify_error(:message => "RunMaster failed on: #{cmd}")
+        return false
+      else
+        log "FAILED #{cmd}, waiting #{waitTime} second before trying again..."
+        sleep waitTime
+        systemAndLog(cmdArgs, numAttempts-1)
+      end
+    end
+    return true
+  end
+
+  # Return whether it was successful
+  def copyContents(source, dest, numTrials)
     convert = lambda { |x|
       if x.is_a?(Run)
         x.path
@@ -123,14 +141,17 @@ class RunMaster
     source = convert.call(source)
     dest = convert.call(dest)
 
-    cmd = ['scp', '-o', 'StrictHostKeyChecking=no', '-r', source, dest]
-    log "Copying contents: #{cmd.join(' ')}"
-    if not system(*cmd)
-      s = "Copying contents failed (#{cmd.join(' ')})"
-      Notification::notify_error(:message => s)
-      return s
-    end
-    nil
+    cmdArgs = ['scp', '-o', 'StrictHostKeyChecking=no', '-r', source, dest]
+    #cmdArgs = ['rsync', '-Lr', '-e', 'ssh -o StrictHostKeyChecking=no', source+'/*', dest]
+    systemAndLog(cmdArgs, numTrials)
+
+    #log "Copying contents: #{cmd.join(' ')}"
+    #if not system(*cmd)
+      #s = "Copying contents failed (#{cmd.join(' ')})"
+      #Notification::notify_error(:message => s)
+      #return s
+    #end
+    #nil
   end
 
   def getJob(workerHandle, opts)
@@ -156,8 +177,12 @@ class RunMaster
       end
       if command
         # Copy contents over first
-        error = copyContents(run, opts)
-        return failedResponse(error) if error
+        if not copyContents(run, opts, 5)
+          # Really should set status to an error status not 'failed' - error due to internal badness; for now, just leave 'running'
+          #self.status.status = 'ready'
+          #self.status.save
+          return successResponse("No job available (copy failed)")
+        end
 
         job = successResponse('Got job')
         setField(job, 'id', run.id) # run id
@@ -175,7 +200,8 @@ class RunMaster
         run.save!
         job
       else
-        failedResponse('Available job already failed')
+        #failedResponse('Available job already failed') # Don't give worker a hard time
+        successResponse('No job available (job already failed during init)')
       end
     else # No
       successResponse('No job available')
@@ -279,7 +305,7 @@ class RunMaster
     exitCode = getField(result, 'exitCode')
 
     # Get contents from zip file
-    #if result['contents'] # This is typically too big, so only set for data processing runs
+    #if result['contents'] # This is typically too big, so only set for data processing runs (deprecated)
       #log "Installing contents of results..."
       #contents = getBase64Field(result, 'contents')
       #zipPath = MyFileUtils.getTmpPath(".zip")
@@ -296,9 +322,10 @@ class RunMaster
     if result['contentsHost'] && result['contentsLocation']
       tmpPath = MyFileUtils.getTmpPath("")
       log "Installing contents of results... (-> #{tmpPath} -> #{run.path})"
-      copyContents(result, tmpPath)
-      systemOrFail('rm', '-rf', run.path) # Delete old run directory
-      File.rename(tmpPath, run.path) # Replace with new one
+      if copyContents(result, tmpPath, 1)
+        systemOrFail('rm', '-rf', run.path) # Delete old run directory
+        File.rename(tmpPath, run.path) # Replace with new one
+      end
     end
     if result['status']
       log "Installing status file..."

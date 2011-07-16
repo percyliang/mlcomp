@@ -77,8 +77,8 @@ object Utils {
   }
 
   def inspect(path:String) = {
-    var maxi = 0
-    var maxj = 0
+    var maxi = 0.0
+    var maxj = 0.0
     var minx = Math.MAX_DOUBLE
     var maxx = Math.MIN_DOUBLE
     var n = 0

@@ -318,9 +318,6 @@ class Run < ActiveRecord::Base
     # but if it doesn't exist, base success on exit code
     map['success'] = (exitCode == 0) unless map.has_key?('success')
     map['exitCode'] = exitCode
-    self.result = YAML.dump(map)
-    self.setSortFields
-    self.saveOrRaise(true)
     success = map['success']
 
     # If I'm a program processing run, then mark program as processed (either success or failed).
@@ -335,13 +332,13 @@ class Run < ActiveRecord::Base
       sourcePath = self.path+"/"+dirs[1]
       if success && File.directory?(sourcePath) # Copy it over
         self.processed_dataset.deleteFromFilesystem
-        log "Installing processed dataset..."
+        log "Installing processed dataset (#{sourcePath} -> #{self.processed_dataset.path})..."
         recursiveCopy(sourcePath, self.processed_dataset.path)
         self.processed_dataset.disk_size = MyFileUtils.getDiskSize(self.processed_dataset.path)
       else
-        log "Dataset processing failed"
+        log "Dataset processing failed (success=#{success}, sourcePath=#{sourcePath})"
         success = map['success'] = false
-        map['message'] = "Dataset processing failed"
+        map['message'] = "Dataset processing failed (internal error)"
       end
       self.processed_dataset.process_status = success ? "success" : "failed"
       self.processed_dataset.result = YAML.dump(map)
@@ -352,8 +349,11 @@ class Run < ActiveRecord::Base
         success = false
       end
     end
-
-    # Update status
+    
+    # Save results to database
+    self.result = YAML.dump(map)
+    self.setSortFields
+    self.saveOrRaise(true)
     self.status.status = success ? 'done' : 'failed'
     self.status.save
     log "Status: #{self.status.status}"

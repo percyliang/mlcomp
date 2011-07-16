@@ -7,7 +7,9 @@ def add(s)
 end
 
 # Recursively add everything
-#add('domains/core')
-#add('domains/flat')
-#add('domains/*/utils')
-add('domains')
+add('domains/core')
+add('domains/flat')
+add('domains/*/utils')
+add('domains/*/sample')
+
+#add('domains') # Only do this after all sample datasets have been processed

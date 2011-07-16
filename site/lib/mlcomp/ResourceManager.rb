@@ -299,7 +299,7 @@ class ResourceManager
   def rerun(arg)
     find(Run, arg, nil) { |r|
       w = r.worker 
-      if w
+      if w && r.status.status == 'running'
         log "ERROR: run #{r} already running on worker #{w.id} (on #{w.host}), skipping..."
         next
       end
@@ -355,11 +355,11 @@ class ResourceManager
       puts "#{script} periodicUpdate"
       puts
       puts "--- Examples ---"
-      puts "#{script} delete dataset:* program:* run:*"
+      puts "#{script} -delete dataset:* program:* run:*"
       puts "  wipes the database (be careful!)"
       basePath = ENV['MLCOMP_SOURCE_PATH']
       if basePath
-        puts "#{script} add #{basePath}/programs #{basePath}/datasets"
+        puts "#{script} -add #{basePath}/programs #{basePath}/datasets"
         puts "  populates the database with programs (some vital) and datasets to get started"
       end
       exit 1

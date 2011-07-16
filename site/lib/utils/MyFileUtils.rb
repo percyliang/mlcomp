@@ -27,6 +27,7 @@ end
 module MyFileUtils
   # Return an absolute path in the temporary directory with the given suffix.
   def self.getTmpPath(suffix)
+    system('mkdir', '-p', Constants::TMP_PATH)
     "#{Constants::TMP_PATH}/#{rand(10000000)}#{suffix}"
   end
 
