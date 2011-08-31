@@ -62,19 +62,43 @@ class ApplicationController < ActionController::Base
 
   def action_notification
     notify_actions = [
-      ["datasets", "create"],
-      ["datasets", "update"],
-      ["datasets", "destroy"],
-      ["programs", "destroy"],
-      ["programs", "create"],
-      ["programs", "update"],
+      ['datasets', 'create'],
+      ['datasets', 'update'],
+      ['datasets', 'destroy'],
+      ['datasets', 'create_bundle'], 
+      ['programs', 'create'],
+      ['programs', 'update'],
+      ['programs', 'destroy'],
+      ['programs', 'create_bundle'], 
       ['runs', 'create'],
+      ['runs', 'destroy'],
+      ['runs', 'create_bundle'],
       ['users', 'create'],
     nil].compact
     if notify_actions.member?([params[:controller], params[:action]])
-      user = session[:user] ? session[:user].username : "anon"
+      # If logged in, comes from session, if creating new user, comes from params
+      if session[:user]
+        username = session[:user].username || "anon"
+        fullname = session[:user].fullname || "?"
+      elsif params[:user]
+        username = params[:user]['username'] || "anon"
+        fullname = params[:user]['fullname'] || "?"
+      end
+
       hostname = `hostname`.chomp
-      message = "#{user}@#{hostname}: #{params[:controller]}.#{params[:action]}(#{params[:id] || "nil"})"
+
+      # What thing are we operating on
+      model = nil
+      if params[:controller] == 'datasets' then model = Dataset
+      elsif params[:controller] == 'programs' then model = Program
+      elsif params[:controller] == 'runs' then model = Run
+      end
+      if model
+        x = model.find(params[:id])
+        payload = x ? "#{x.id}:#{x.name}" : params[:id]
+      end
+
+      message = "#{username}@#{hostname} (#{fullname}): #{params[:controller]}.#{params[:action]}(#{payload})"
       Notification::notify_event({:message => message})
     end
   end

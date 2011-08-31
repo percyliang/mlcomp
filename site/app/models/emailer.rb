@@ -15,24 +15,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class Emailer < ActionMailer::Base
-  
   # All of the settings here should probably be changed, these are the
   # default emailer settings for mlcomp's live server
-  
-  def user_comment(username, fullname, email, message, url, sent_at = Time.now)
-    @subject = "User Comment from #{username} (#{fullname})"
-    @recipients = ['mlcomp.support@gmail.com']
-    @from = 'MLcomp commenter <noreply@mlcomp.org>'
-    @reply_to = email if email
-    @sent_on = sent_at
-    @body = {:username => username, :fullname => fullname, :message => message, :url => url, :sent => sent_at}
+
+  def user_comment(username, fullname, email, message, url)
+    @subject = "User comment from #{username} (#{fullname})"
+    @recipients = SITEPARAMS[:notify_recipients]
+    @from = 'MLcomp commenter'
+    @reply_to = email
+    @sent_on = Time.now
+    @body = {:username => username, :fullname => fullname, :email => email, :message => message, :url => url}
     @headers = {}
   end
   
   def general_email(subject, body)
     @subject = subject
-    @recipients = ['jake@cs.berkeley.edu', 'pliang@cs.berkeley.edu', 'mlcomp.support@gmail.com']
-    @from = 'MLcomp server <mlcomp.support@gmail.com>'
+    @recipients = SITEPARAMS[:notify_recipients]
+    @from = 'MLcomp server'
     @sent_on = Time.now
     @body = {:body => body}
     @headers = {}

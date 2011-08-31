@@ -24,7 +24,7 @@
 				pg[:comment_status].appear
 			}, :with => "Form.serialize('comment_form')",
       # Post annoying message
-			:confirm => session[:user] ? nil : "Are you a spambot? If not, you must include the string 'notspam' in your comment. For example: \"Hi, mlcomp is great, wonderful job! --notspam\"" %></span><span id="comment_status" style="display:none">empty</span>
+			:confirm => session[:user] ? nil : "Please include the string 'notspam' in your comment or log in to prove you're not a spammer." %></span><span id="comment_status" style="display:none">empty</span>
 <% end -%>
 
 <script type="text/javascript" charset="utf-8">

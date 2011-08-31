@@ -74,20 +74,20 @@ end
 
 if SITEPARAMS[:email_configured]
 
-  # This is the code to send emails via gmail
+  # This is the code to send emails
   
   require 'smtp_tls'
   
   ActionMailer::Base.raise_delivery_errors = true
   ActionMailer::Base.delivery_method = :smtp
-  ActionMailer::Base.smtp_settings = SITEPARAMS[:gmail_config_params]
+  ActionMailer::Base.smtp_settings = SITEPARAMS[:email_config_params]
 
   # A typical configuration of ActionMailer::Base.smtp_settings is:
   # {
   #   :address => "smtp.gmail.com",
   #   :port => 587,
   #   :authentication => :plain,
-  #   :user_name => "mlcomp.support@gmail.com",
+  #   :user_name => "<username>@gmail.com",
   #   :password => ""
   # }
 

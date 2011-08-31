@@ -1,14 +1,11 @@
 --- 
-:email_configured: true
-:gmail_config_params: 
+:email_configured: true # Set this if you want to enable email.
+:email_config_params: # Information used to send out all emails.
   :port: 587
   :authentication: :plain
   :user_name: USERNAME@gmail.com
   :password: PASSWORD
   :address: smtp.gmail.com
-:twitter_configured: true
-:twitter_tokens: 
-  :consumer_secret: 0Dsa...
-  :access_secret: jDn3T...
-  :consumer_token: G5HO...
-  :access_token: 77085...
+:notify_recipients: # When user comments or events happen on the server, these email addresses get notified.
+  - <recipient1-of-events-and-comments>@gmail.com
+  - <recipient2-of-events-and-comments>@gmail.com

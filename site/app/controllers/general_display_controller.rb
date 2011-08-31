@@ -99,18 +99,25 @@ class GeneralDisplayController < ApplicationController
   def leave_comment
     comment = params[:comment]
     commenturl = params[:commenturl]
-    if session[:user] || comment =~ /notspam/ # If logged in or user said notspam
+    accept = session[:user] || comment =~ /notspam/ # If logged in or user said notspam
+    if accept
       username = session[:user] ? session[:user].username : "anon"
       fullname = session[:user] ? session[:user].fullname : "anon"
       email = session[:user] ? session[:user].email : nil
+      #puts [username, fullname, email].inspect
       if SITEPARAMS[:email_configured]
         Emailer.deliver_user_comment(username, fullname, email, comment, commenturl)
       end
     end
     render :update do |page|
-      page.call "$('comment').clear"
-      page[:comment_status].replace_html "Comment sent, Thanks!"
-      page.visual_effect :fade, 'comment_status', :duration => 5
+      if accept
+        page.call "$('comment').clear"
+        page[:comment_status].replace_html "Comment sent, Thanks!"
+        page.visual_effect :fade, 'comment_status', :duration => 5
+      else
+        page[:comment_status].replace_html "Comment not sent, please try again."
+        page.visual_effect :fade, 'comment_status', :duration => 5
+      end
     end
   end
 
