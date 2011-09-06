@@ -93,9 +93,11 @@ class ApplicationController < ActionController::Base
       elsif params[:controller] == 'programs' then model = Program
       elsif params[:controller] == 'runs' then model = Run
       end
-      if model
+      if model && params[:id]
         x = model.find(params[:id])
         payload = x ? "#{x.id}:#{x.name}" : params[:id]
+      else
+        payload = params[:id]
       end
 
       message = "#{username}@#{hostname} (#{fullname}): #{params[:controller]}.#{params[:action]}(#{payload})"
