@@ -48,7 +48,7 @@ class EC2Manager
     @maxWaitTime, @minStartInstanceInterval, @maxIdleTime,
         = extractArgs(:args => args, :spec => [
       ['verbose', Fixnum, 0],
-      ['ami', String, 'ami-a630cbcf'], # worker5 (worker version 30)
+      ['ami', String, 'ami-262ff74f'], # worker6 (worker version 30)
       ['zone', String, 'us-east-1a'],
       ['instanceType', String, 'm1.small'],
       ['minWorkers', Fixnum, 0],
