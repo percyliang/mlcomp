@@ -1,0 +1,59 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+def inspect(path)
+  exitFail("File doesn't exist: '#{path}'") if not File.exists?(path)
+  stats = readExamples(path)
+  writeStatus({'numSentences' => stats[0],
+               'numWords' => stats[1]})
+  exitSuccess
+end
+
+def readExamples(path)
+  numSentences = 0
+  numWords = 0
+  lines = IO.readlinesClean(path)
+  lines.each { |line|
+    number_fields = line.split().size()
+    if (number_fields == 0)
+      numSentences += 1
+    elsif (number_fields == 10)
+      numWords += 1
+    else
+      exitFail("Error in line: #{line}")
+    end
+  }
+  [numSentences, numWords]
+end
+
+def stripLabels(inPath, outPath)
+  lines = IO.readlinesClean(inPath)
+  out = Kernel.open(outPath, "w")
+  lines.each { |line|
+    if (line == "")
+      out.puts("")
+    else
+      fields = line.split()
+      out.puts("#{fields[0]}	#{fields[1]}	_	_	_	_	_	_	_	_")
+    end 
+  }
+  out.close
+end
+
+def evaluate(truePath, predPath)
+    systemOrFail('perl eval.pl', '-q', '-g ' + truePath, '-s ' + predPath)
+end
+
+cmd = ARGV.shift
+case cmd
+  when 'inspect'
+    path, = parseArgs(:file)
+    inspect(path)
+  when 'stripLabels'
+    inPath, outPath = parseArgs(:file, :nonexist)
+    stripLabels(inPath, outPath)
+  when 'evaluate' then
+    truePath, predPath = parseArgs(:file, :file)
+    evaluate(truePath, predPath)
+end
