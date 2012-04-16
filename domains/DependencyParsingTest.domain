@@ -5,9 +5,9 @@ taskDescription: |-
 datasetDescription: |-
   The format follows the popular CoNNL-X shared task format described here: http://ilk.uvt.nl/conll/index.html#dataformat
   In particular, each line corresponds to a word in a sentence and empty lines separate two sentences. Each line has 10 tab separated fields, some of which can be empty (indicated by _). See the link above for details.
-sampleDataset: dependency-parsing-sample
-utilsProgram: dependency-parsing-utils
-evaluatorProgram: dependency-parsing-evaluator (based on eval.pl http://ilk.uvt.nl/conll/software.html)
+sampleDataset: dependency-parsing-test-sample
+utilsProgram: dependency-parsing-test-utils
+evaluatorProgram: dependency-parsing-test-utils
 datasetFields:
   - name: "#trainSentences"
     type: integer
@@ -26,15 +26,15 @@ datasetFields:
     value: train/numWords
     description: Number of test tokens.
 runFields:
-  - name: LAS:
+  - name: LAS
     type: double
     value: doTest/evaluate/LAS
     description: Labeled attachment score (fraction of correct labeled arcs).
-  - name: UAS:
+  - name: UAS
     type: double
     value: doTest/evaluate/UAS
     description: Unlabeled attachment score (fraction of correct unlabeled arcs).
-  - name: POS:
+  - name: POS
     type: double
     value: doTest/evaluate/POS
     description: Part-of-speech tag accuracy (fraction of correct tag labels).
