@@ -9,37 +9,29 @@ sampleDataset: dependency-parsing-test-sample
 utilsProgram: dependency-parsing-test-utils
 evaluatorProgram: dependency-parsing-test-utils
 datasetFields:
-  - name: "#trainSentences"
+  - name: "#sentences"
     type: integer
-    value: train/numSentences
-    description: Number of training sentences.
-  - name: "#trainWords"
-    type: integer
-    value: train/numTokens
-    description: Number of training tokens.
-  - name: "#testSentences"
-    type: integer
-    value: train/numSentences
+    value: raw/numSentences
     description: Number of test sentences.
-  - name: "#testTokens"
+  - name: "#tokens"
     type: integer
-    value: train/numWords
+    value: raw/numTokens
     description: Number of test tokens.
 runFields:
   - name: LAS
     type: double
-    value: doTest/evaluate/LAS
+    value: evaluate/LAS
     description: Labeled attachment score (fraction of correct labeled arcs).
   - name: UAS
     type: double
-    value: doTest/evaluate/UAS
+    value: evaluate/UAS
     description: Unlabeled attachment score (fraction of correct unlabeled arcs).
   - name: POS
     type: double
-    value: doTest/evaluate/POS
+    value: evaluate/POS
     description: Part-of-speech tag accuracy (fraction of correct tag labels).
   - name: Predict test time
     type: time
-    value: doTest/predict/time
+    value: predict/time
     description: Time to predict on the test set.
-errorFieldValue: doTest/evaluate/errorRate
+errorFieldValue: evaluate/errorRate
