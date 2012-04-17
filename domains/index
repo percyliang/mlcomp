@@ -5,6 +5,7 @@
 - CollaborativeFiltering
 - DocumentClassification
 - WordSegmentation
+- ConstituencyParsingTest
 - DependencyParsingTest
 - OnlineLearningMulticlass
 - BanditMulticlass
