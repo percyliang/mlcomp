@@ -1,0 +1,40 @@
+name: ConstituencyParsingTest
+kind: performing
+taskDescription: |-
+  The goal of this task is labeled constituency parsing with integrated part-of-speech tagging.
+datasetDescription: |-
+  The format follows the LDC constituency parse tree format.
+sampleDataset: constituency-parsing-test-sample
+utilsProgram: constituency-parsing-test-utils
+evaluatorProgram: constituency-parsing-test-utils
+datasetFields:
+  - name: "#sentences"
+    type: integer
+    value: raw/numSentences
+    description: Number of test sentences.
+  - name: "#tokens"
+    type: integer
+    value: raw/numTokens
+    description: Number of test tokens.
+runFields:
+  - name: F1
+    type: double
+    value: evaluate/F1
+    description: Harmonic mean of precision and recall.
+  - name: LP
+    type: double
+    value: evaluate/LP
+    description: Labeled Precision (fraction of correct nodes among predicted nodes).
+  - name: LR
+    type: double
+    value: evaluate/LR
+    description: Labeled Recall (fraction of correctly predicted nodes among predicted nodes).
+  - name: POS
+    type: double
+    value: evaluate/POS
+    description: Part-of-speech tag accuracy (fraction of correct tag labels).
+  - name: Predict test time
+    type: time
+    value: predict/time
+    description: Time to predict on the test set.
+errorFieldValue: evaluate/errorRate

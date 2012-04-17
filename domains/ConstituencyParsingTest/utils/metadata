@@ -1,0 +1,3 @@
+name: constituency-parsing-test-utils
+description: Inspects ConstituencyParsingTest datasets and evaluates performance.
+task: Inspect Strip Evaluate

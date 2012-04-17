@@ -1,0 +1,53 @@
+#!/usr/bin/ruby
+
+require 'general'
+
+def inspect(path)
+  exitFail("File doesn't exist: '#{path}'") if not File.exists?(path)
+  outTmp = 'tmp'
+  stripLabels(path, outTmp)
+  stats = readExamples(outTmp)
+  writeStatus({'numSentences' => stats[0],
+               'numTokens' => stats[1]})
+  systemOrFail('rm', outTmp)
+  exitSuccess
+end
+
+def readExamples(path)
+  numSentences = 0
+  numTokens = 0
+  lines = IO.readlinesClean(path)
+  lines.each { |line|
+    numSentences += 1
+    numTokens += line.split().size()
+  }
+  [numSentences, numTokens]
+end
+
+def stripLabels(inPath, outPath)
+  ENV['CLASSPATH'] = './BerkeleyParser.jar'
+  systemOrFail('java', 'edu.berkeley.nlp.PCFGLA.TreeLabeler', '-inputFile', inPath, '-outputFile', outPath, '-getYield')
+end
+
+def evaluate(truePath, predPath)
+  systemOrFail('./evalb', '-p', 'new.prm', truePath, predPath)
+end
+
+def construct()
+  systemOrFail('make')
+end
+
+cmd = ARGV.shift
+case cmd
+  when 'construct'
+    construct()
+  when 'inspect'
+    path, = parseArgs(:file)
+    inspect(path)
+  when 'stripLabels'
+    inPath, outPath = parseArgs(:file, :nonexist)
+    stripLabels(inPath, outPath)
+  when 'evaluate' then
+    truePath, predPath = parseArgs(:file, :file)
+    evaluate(truePath, predPath)
+end
