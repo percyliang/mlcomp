@@ -6,25 +6,25 @@ def inspect(path)
   exitFail("File doesn't exist: '#{path}'") if not File.exists?(path)
   stats = readExamples(path)
   writeStatus({'numSentences' => stats[0],
-               'numWords' => stats[1]})
+               'numTokens' => stats[1]})
   exitSuccess
 end
 
 def readExamples(path)
   numSentences = 0
-  numWords = 0
+  numTokens = 0
   lines = IO.readlinesClean(path)
   lines.each { |line|
     number_fields = line.split().size()
     if (number_fields == 0)
       numSentences += 1
     elsif (number_fields == 10)
-      numWords += 1
+      numTokens += 1
     else
       exitFail("Error in line: #{line}")
     end
   }
-  [numSentences, numWords]
+  [numSentences, numTokens]
 end
 
 def stripLabels(inPath, outPath)
