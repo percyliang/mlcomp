@@ -32,12 +32,12 @@
       if run.core_dataset
         domain = Domain.get(run.core_dataset[:format])
         fieldSpec = domain.runFieldSpec
-        info_data << ["Domain:", domain.name]
+        info_data << ["Domain", domain.name]
         fieldSpec.names.each_with_index do |fspecname,i| 
           info_data << ["<span title=\"#{fieldSpec.descriptions[i]}\">#{fspecname}</span>", fieldSpec.render(i, run.getSortField(i))]
         end
       else
-        info_data << ["Domain:", 'none']
+        info_data << ["Domain", 'none']
       end %>
 
 		<table border="0" cellspacing="0" cellpadding="0" class="attribute_table">
