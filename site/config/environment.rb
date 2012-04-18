@@ -6,7 +6,6 @@
 
 # Specifies gem version of Rails to use when vendor/rails is not present
 RAILS_GEM_VERSION = '2.1.1' unless defined? RAILS_GEM_VERSION
-#RAILS_GEM_VERSION = '2.0.2' unless defined? RAILS_GEM_VERSION
 
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
@@ -60,17 +59,16 @@ Rails::Initializer.run do |config|
   # config.active_record.default_timezone = :utc
 end
 
-
 require 'rubygems'
 require 'rails_sql_views'
 require 'yaml'
 
 site_params_file = RAILS_ROOT + "/config/mlcomp_site_params.yml"
-SITEPARAMS = {}
 if File.exists?(site_params_file)
   SITEPARAMS = YAML::load File.read(site_params_file)
+else
+  SITEPARAMS = {}
 end
-
 
 if SITEPARAMS[:email_configured]
 

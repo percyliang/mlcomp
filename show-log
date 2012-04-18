@@ -1,0 +1,1 @@
+tail -f site/log/mlcomp.log | grep SENDING
