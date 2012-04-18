@@ -707,13 +707,15 @@ int *bn;
 			qt++;
 		}
 		
+		/* Slav: do not delete terminals */
                 /* delete terminal */
-		if(*q==')' && is_deletelabel(label)==1){
-		    p = q+1;
-		    continue;
+		//if(*q==')' && is_deletelabel(label)==1){
+		//    p = q+1;
+		//    continue;
 
 		/* valid terminal */
-		}else if(*q==')'){
+		//}else 
+		if(*q==')'){
 		    strcpy(terminal[wid].word,word);
 		    strcpy(terminal[wid].label,label);
 		    wid++;
@@ -833,9 +835,12 @@ calc_result(unsigned char *buf1,unsigned char *buf)
     //Error("Length unmatch (%d|%d)\n",wn1,wn2);
 	fix_quote();
 	if(wn1 != wn2){
-		Error("Length unmatch (%d|%d)\n",wn1,wn2);
 		individual_result(0,0,0,0,0,0);
-		return;
+		/* Slav: ignore 1 word sentences */
+		if (wn1 > 1) {
+			Error("Length unmatch (%d|%d)\n",wn1,wn2);
+			return;
+		}
 	}
     }
 
