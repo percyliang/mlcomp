@@ -18,7 +18,7 @@ NOTE: always source the rc file (run . ./rc in bash) before running any of the f
 #
 # On Debian, these can be installed with the following command, but check the Ruby version:
 
-  sudo apt-get install mysql-server rake rubygems libopenssl-ruby # (for Debian)
+  sudo apt-get install mysql-server rake rubygems mongrel libopenssl-ruby # (for Debian)
 
 # You will also need three different gems installed.
 # The last of these depends on a local gem which we provide, but you must
