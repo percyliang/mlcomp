@@ -1,0 +1,6 @@
+#!/usr/bin/ruby
+
+require 'webrick'
+web_server = WEBrick::HTTPServer.new(:Port => 3000, :DocumentRoot => Dir.pwd + '/site/app/views/static')
+trap('INT') { web_server.shutdown }
+web_server.start
