@@ -43,6 +43,7 @@ LABELED 1
 ##    deildrens).                           ##
 ##------------------------------------------##
 DELETE_LABEL TOP
+DELETE_LABEL ROOT
 DELETE_LABEL S1
 DELETE_LABEL -NONE-
 DELETE_LABEL ,
