@@ -524,6 +524,7 @@ my ($p_2, $p_1, $p1, $p2) ;
 my ($short_output) ;
 my ($score_on_punct) ;
 $counts{punct} = 0; # initialize
+$counts{err_pos} = 0; # initialize
 
 getopts("g:o:s:qvhpb") ;
 
