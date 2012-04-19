@@ -42,7 +42,7 @@ def stripLabels(inPath, outPath)
 end
 
 def evaluate(truePath, predPath)
-    systemOrFail('perl eval.pl', '-q', '-g ' + truePath, '-s ' + predPath)
+    systemOrFail('perl', 'eval.pl', '-q', '-g', truePath, '-s', predPath)
 end
 
 cmd = ARGV.shift
