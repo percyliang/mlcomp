@@ -1297,12 +1297,12 @@ print_total()
     // Write stats also to a file.
     file = fopen("status", "w");
     fprintf(file, "---\n");
-    fprintf(file, "F1: %.2f\n", r);
+    fprintf(file, "F1: %.2f\n", f);
     fprintf(file, "LP: %.2f\n", p);
-    fprintf(file, "LR: %.2f\n", f);
+    fprintf(file, "LR: %.2f\n", r);
     fprintf(file, "POS: %.2f\n",
            (TOTAL_word>0?100.0*TOTAL_correct_tag/TOTAL_word:0.0));
-    fprintf(file, "errorRate: %.2f\n", 100-r);
+    fprintf(file, "errorRate: %.2f\n", 100-f);
     fclose(file);
 
     sentn = TOT40_sent - TOT40_error_sent - TOT40_skip_sent;
