@@ -969,7 +969,7 @@ printf STATUS "---\n";
 printf STATUS "LAS: %.2f\n", 100-$counts{err_any}*100.0/$counts{tot} ;
 printf STATUS "UAS: %.2f\n", 100-$counts{err_dep}{tot}*100.0/$counts{tot} ;
 printf STATUS "POS: %.2f\n", 100-$counts{err_pos}*100.0/$counts{tot} ;
-printf STATUS "errorRate: %.2f\n", $counts{err_pos}*1.0/$counts{tot} ;
+printf STATUS "errorRate: %.2f\n", $counts{err_any}*100.0/$counts{tot} ;
 close STATUS ;
 
 
