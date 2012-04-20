@@ -17,6 +17,10 @@ datasetFields:
     value: raw/numTokens
     description: Number of test tokens.
 runFields:
+  - name: Time
+    type: time
+    value: perform/time
+    description: Time to perform the task.
   - name: F1
     type: double
     value: evaluate/F1
@@ -33,8 +37,4 @@ runFields:
     type: double
     value: evaluate/POS
     description: Part-of-speech tag accuracy (fraction of correct tag labels).
-  - name: Predict test time
-    type: time
-    value: predict/time
-    description: Time to predict on the test set.
 errorFieldValue: evaluate/errorRate

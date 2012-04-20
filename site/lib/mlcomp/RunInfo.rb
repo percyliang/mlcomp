@@ -57,7 +57,7 @@ class RunInfo
 
   # If not a finite float, then replace with nil
   # Need this because SQL doesn't allow storing of NaNs or infinities
-  def ensureFloat(x); x.is_a?(Float) && x.finite? ? x : nil end
+  def ensureFloat(x); x.is_a?(Fixnum) || (x.is_a?(Float) && x.finite?) ? x : nil end
 
   def coreProgram; raise "Abstract method" end
   def coreDataset; raise "Abstract method" end
