@@ -39,12 +39,18 @@ class RunMaster
     rescue Exception => e
       @mutex.unlock if @mutex.locked?
       log "EXCEPTION: #{e.message}\n#{e.backtrace.join("\n")}"
-      if [ProgramException, DatasetException, RunException, WorkerException].find { |t| e.is_a?(t) } then
-        failedResponse(e.message) # Benign failure
-      else
-        Notification::notify_error(:message => "RunMaster exception: #{e.message}")
-        @server.shutdown # This is really bad - we just get out of here (master will be restarted)
+      # Mysql::Error: Lost connection to MySQL server during query: SELECT * FROM `workers`
+      # If a really bad error occurred, then we shutdown the server 
+      if not [ProgramException, DatasetException, RunException, WorkerException].find { |t| e.is_a?(t) } then
+        if not @shutdown_server
+          @shutdown_server = true # Remember, so we don't try to shutdown too many times
+          Notification::notify_error(:message => "RunMaster exception: #{e.message}")
+          puts "Shutting down server..."
+          @server.shutdown
+          puts "Server shutdown."
+        end
       end
+      failedResponse(e.message)
     end
   end
 
