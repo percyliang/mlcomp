@@ -53,23 +53,53 @@ class RatingEngine
       errors[key] = [errors[key] || $infty, error].min
     }
 
+    row = lambda { |items|
+      items.map { |x| x.to_s.gsub(/\t/, ' ') }.join("\t")
+    }
+
+    # Dump all the datasets...
+    puts "=== Going through #{Dataset.count} datasets..."
+    lines = []
+    lines << row.call(['domain', 'datasetID', 'datasetName', 'info'])
+    # Convert resultTree into a set of entries
+    flattenEntries = lambda { |tree,path,entries|
+      if not tree.is_a?(Hash)
+        entries << path.join(".") + "=" + tree.to_s
+      else
+        tree.each { |k,v|
+          next if k == 'success' || k == 'exitCode' || k == 'time' || k == 'splitter'
+          flattenEntries.call(v, path+[k], entries)
+        }
+      end
+    }
+    Dataset.find(:all, :conditions => ['process_status = (?)', 'success']).each { |dataset|
+      entries = []
+      flattenEntries.call(dataset.resultTree, [], entries)
+      lines << row.call([dataset.format, dataset.id, dataset.name, entries.join('||')])
+    }
+    path = ENV['MLCOMP_SOURCE_PATH']+'/site/public/download/datasets.txt'
+    out = open(path, 'w')
+    lines.each { |line| out.puts line }
+    out.close
+
     # Go through all runs
     puts "=== Going through #{numRuns} runs..."
-    path = ENV['MLCOMP_SOURCE_PATH']+'/site/public/download/runs.txt' # Save results of all runs
     lines = []
-    lines << ['domain', 'programID', 'programName', 'datasetID', 'datasetName', 'runID', 'tunedHyperparameters', 'error'].join("\t")
+    lines << row.call(['domain', 'programID', 'programName', 'datasetID', 'datasetName', 'runID', 'tunedHyperparameters', 'error'])
     Run.find(:all).each_with_index { |r,i|
       s = r.status.status
       program = r.info.coreProgram
       dataset = r.info.coreDataset
       next if (not program) || program.is_helper
-      lines << [dataset.format, program.id, program.name, dataset.id, dataset.name, r.id, r.tuneHyperparameters ? true : false, s == 'done' ? r.error : 'failed'].join("\t")
+      lines << row.call([dataset.format, program.id, program.name, dataset.id, dataset.name, r.id, r.tuneHyperparameters ? true : false, s == 'done' ? r.error : 'failed'])
+
       if s == 'done' && r.error
         add.call(program, dataset, r.error)
       elsif s == 'failed'
         add.call(program, dataset, $infty)
       end
     }
+    path = ENV['MLCOMP_SOURCE_PATH']+'/site/public/download/runs.txt'
     out = open(path, 'w')
     lines.each { |line| out.puts line }
     out.close
