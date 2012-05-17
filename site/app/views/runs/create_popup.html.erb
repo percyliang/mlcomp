@@ -53,11 +53,10 @@
 		</table>
     <br>
 
-		<label>Tune hyperparameters:</label> <%= check_box_tag 'run[tune]' %><br>
-    <div style="font-size:0.8em;margin-left:1em">
-      Check this box only if <tt>setHyperparameter</tt> is supported by the program.
-    </div>
-    <br>
+    <% if @program.tuneable %>
+      <label>Tune hyperparameters:</label> <%= check_box_tag 'run[tune]' %><br>
+      <br>
+    <% end %>
 
     <label>Time limit (hours):</label>
     <%= text_field_tag('run[allowedTime]', '5', {:size => 1, :id => 'time_limit_input'})%>
