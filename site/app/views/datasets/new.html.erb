@@ -12,7 +12,7 @@
 <h3>Upload Dataset</h3>
 <hr/>
 
-<h4>What type of data do you have?</h4>
+<h4>What type of data do you have (select the domain)?</h4>
 
 <% form_for(@dataset, :html => {:multipart => true, :id => 'dataset_upload'}) do |f| %>
 
@@ -57,7 +57,7 @@
 
 <hr/>
 
-<h4>How do you want to give us your data?</h4>
+<h4>How do you want to upload your data?</h4>
 
 <table border="0" cellspacing="5" cellpadding="5">
 	<tr>
@@ -73,8 +73,8 @@
 
 	<tr>
 		<td><%= radio_button_tag('upload_format', 'zip') %>
-			<b>Upload split data</b></td>
-		<td>I have my data already split into train/test</td>
+			<b>Upload zip file</b></td>
+		<td>I have my data in a zip file which contains either a single file, 'raw', or two files, 'train' and 'test'.</td>
 	</tr>
 </table>
 	
