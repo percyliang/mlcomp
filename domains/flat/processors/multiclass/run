@@ -78,8 +78,12 @@ def split(rawPath, trainPath, testPath):
 def stripLabels(inPath, outPath):
   f = open(outPath, "w")
   for line in open(inPath):
-    y, x = line.split(" ", 1)
-    f.write("1 "+x)
+    print line
+    if " " in line:
+      y, x = line.split(" ", 1)
+      f.write("1 "+x)
+    else:
+      f.write("1")
   f.close()
 
 cmd = sys.argv[1]
