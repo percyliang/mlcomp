@@ -1,1 +1,0 @@
-../svmlight-format.rb
