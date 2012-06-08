@@ -16,7 +16,7 @@ case cmd
     # Convert binary to multiclass
     out = open(myDatashard, "w")
     IO.foreachClean(datashard) { |line|
-      y, x = line.split(/ /, 2)
+      y, x = line.trim.split(/\s+/, 2)
       y = y.to_i
       if y == 1 then y = 1
       elsif y == -1 then y = 2
@@ -38,7 +38,7 @@ case cmd
     # Convert multiclass to binary
     out = open(outPath, "w")
     IO.foreachClean(myOutPath) { |line|
-      y, x = line.split(/ /, 2)
+      y, x = line.trim.split(/\s+/, 2)
       y = y.to_i
       if y == 1 then y = 1
       elsif y == 2 then y = -1

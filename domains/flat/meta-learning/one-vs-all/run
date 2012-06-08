@@ -15,7 +15,7 @@ case cmd
     datashard, = parseArgs(:file)
 
     points = IO.readlinesClean(datashard).map { |line|
-      y, x = line.split(/ /, 2)
+      y, x = line.trim.split(/\s+/, 2)
       y = y.to_i
       [x,y]
     }
