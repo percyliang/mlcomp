@@ -55,6 +55,16 @@ class RunMaster
   end
 
   def initialize(args)
+    # TODO: this doesn't work as intended
+    #puts "Starting thread to maintain connectivity to MySQL..."
+    #@active = true
+    #@pingThread = Thread.new {
+    #  while @active
+    #    puts "ping #{Program.count}"
+    #    sleep 10
+    #  end
+    #}
+
     @mutex = Mutex.new
 
     # local: accept connections only locally (hack for master to work for Macs, because * works)
@@ -93,6 +103,10 @@ class RunMaster
     }
 
     @server.serve
+
+    #puts "Joining thread...."
+    #@active = false
+    #@pingThread.join if @pingThread
   end
 
   def getNewWorkerHandle(username, password)

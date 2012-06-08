@@ -155,7 +155,7 @@ class Domain
     begin
       index = YAML::load(File.read(path))
     rescue Exception
-      puts "Unable to load index file #{path}: #{$!}"
+      $stderr.puts "Unable to load index file #{path}: #{$!}"
     end
     index.each { |name|
       path = "#{basePath}/#{name}.domain"
@@ -165,13 +165,13 @@ class Domain
         @@names << domain.name
         @@name2domain[domain.name] = domain
       rescue Exception
-        puts "Unable to load domain #{path}: #{$!}"
+        $stderr.puts "Unable to load domain #{path}: #{$!}"
         if true # TMP
           puts $!.backtrace.join("\n")
           break
         end
       end
     }
-    puts "(loaded #{@@names.size} domains from #{basePath})"
+    $stderr.puts "(loaded #{@@names.size} domains from #{basePath})"
   end
 end

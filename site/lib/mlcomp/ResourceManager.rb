@@ -205,32 +205,37 @@ class ResourceManager
     end
   end
 
-  def find(table, spec, defaultKey, &handler)
-    key = defaultKey
+  def find(table, specs, defaultKey, &handler)
     joins = []
-    if spec =~ /^(.+)=(.+)$/
-      key = $1
-      spec = $2
-      if key == 'status'
-        joins << :status
-        key = 'run_statuses.status'
-      elsif key == 'program'
-        joins << :core_program
-        key = 'programs.name'
-      elsif key == 'dataset'
-        joins << :core_dataset
-        key = 'datasets.name'
+    constraints = [] # list of (key,value) pairs
+    specs.split(/,/).each { |spec|
+      key = defaultKey
+      if spec =~ /^(.+)=(.+)$/ # Custom key
+        key = $1
+        spec = $2
+        if key == 'status'
+          joins << :status
+          key = 'run_statuses.status'
+        elsif key == 'program'
+          joins << :core_program
+          key = 'programs.name'
+        elsif key == 'dataset'
+          joins << :core_dataset
+          key = 'datasets.name'
+        end
       end
-    end
-    if spec == '*' then
-      matches = table.find(:all)
-    elsif spec =~ /^\d+$/
-      matches = [table.find(spec.to_i)].compact
-    elsif key
-      matches = table.find(:all, :joins => joins, :conditions => ["#{key} = (?)", spec])
-    else
-      matches = []
-    end
+
+      if spec == '*' then # All
+        constraints = []
+      elsif spec =~ /^\d+$/ # By id
+        constraints << ['id', spec]
+      elsif key # By default key
+        constraints << [key, spec]
+      end
+    }
+    format = constraints.map { |key,spec| "#{key} = (?)" }.join(" AND ")
+    args = constraints.map { |key,spec| spec }
+    matches = table.find(:all, :joins => joins, :conditions => [format] + args)
     matches.each { |obj| handler.call(obj) }
     $stderr.puts "#{matches.size} matches"
   end
@@ -243,10 +248,16 @@ class ResourceManager
       x.destroy
     end
   } end
-  def list(arg); filter(arg) { |name,x| puts x.inspect } end
+  def list(arg); filter(arg) { |name,x|
+    #puts x.inspect
+    puts [x.class, x.id, x.name].join("\t")
+  } end
 
   def filter(arg, &op)
-    arg =~ /^(\w+):(.+)$/ or return
+    unless arg =~ /^(\w+):(.+)$/
+      $stderr.puts "Expected (program|dataset|run):<spec>, but got #{arg}"
+      return
+    end
     type, spec = $1, $2
     # OLD: Recursively delete the runs for a program and dataset;
     # OLD: Note: can't use the same instance because (Program|Dataset).runs doesn't get updated!
@@ -263,6 +274,7 @@ class ResourceManager
         }
       when 'run' then
         if spec == 'oldRepeats'
+          # Delete repeat runs which are repeats
           Run.find(:all).each { |r|
             next if r.running?
             others = Run.findAllByInfoSpec(r.info_spec)
@@ -280,7 +292,8 @@ class ResourceManager
   end
 
   def kill(arg)
-    find(Run, arg, nil) { |r|
+    filter(arg) { |name,r|
+      next unless r.is_a?(Run)
       if r.status.status != 'running'
         log "Run #{r.id} not running"
       else
@@ -297,7 +310,8 @@ class ResourceManager
     }
   end
   def rerun(arg)
-    find(Run, arg, nil) { |r|
+    filter(arg) { |name,r|
+      next unless r.is_a?(Run)
       w = r.worker 
       if w && r.status.status == 'running'
         log "ERROR: run #{r} already running on worker #{w.id} (on #{w.host}), skipping..."
@@ -310,13 +324,10 @@ class ResourceManager
 
   # Process a program or dataset
   def process(arg)
-    find(Program, arg, 'name') { |p|
-      run = p.process
-      log "Added run #{run.id} to process dataset #{p.name} (#{p.id})"
-    }
-    find(Dataset, arg, 'name') { |d|
-      run = d.process
-      log "Added run #{run.id} to process dataset #{d.name} (#{d.id})"
+    filter(arg) { |name,x|
+      next unless x.is_a?(Program) || x.is_a?(Dataset)
+      run = x.process
+      log "Added run #{run.id} to process dataset #{x.name} (#{x.id})"
     }
   end
 
