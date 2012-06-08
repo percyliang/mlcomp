@@ -299,7 +299,7 @@ class Run < ActiveRecord::Base
     lines += spec.nodes.sort {|a,b| a[0] <=> b[0]}.map { |node_id,node,children|
       case node
         when Program, Dataset
-          "#{dirs[node_id]}: #{node.name} (id=#{node.id}, created by #{node.user.username}) [#{node.description}]"
+          "#{dirs[node_id]}: #{node.name} (id=#{node.id}, created by #{node.user && node.user.username}) [#{node.description}]"
         else
           nil
       end

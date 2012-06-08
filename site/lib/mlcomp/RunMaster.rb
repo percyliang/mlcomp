@@ -194,6 +194,7 @@ class RunMaster
         run.status.save!
         run.result = YAML.dump('success' => false, 'message' => "Unable to start run: #{$!}")
         run.save!
+        log $!.backtrace.join("\n") # Something screwed up
       end
       if command
         # Copy contents over first
