@@ -178,14 +178,15 @@ class RunMaster
     log "getJob: #{workerHandle} #{opts.inspect}" if @verbose >= 1
     worker = Worker.findByHandle(workerHandle)
     if worker.current_run
-      Notification::notify_error(:message => "Worker #{worker.handle} not done with run #{worker.current_run.id} but is asking for new one; worker might have crashed")
-      return failedResponse("You haven't finished run #{worker.current_run.id}; try running ./worker -giveUp")
+      Notification::notify_error(:message => "Worker #{worker.handle} not done with run #{worker.current_run.id} but is asking for new one, assuming gave up")
+      ensureNoRun(worker)
+      return failedResponse("You haven't finished run #{worker.current_run.id}, assuming gave up")
     end
 
     # See if we have a run to execute
     run = getRun(worker)
     if run # Yes
-      log "Creating job for run #{run.id}"
+      log "Creating new job for run #{run.id}"
       command = nil
       begin
         command = run.startRun

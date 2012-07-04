@@ -435,8 +435,8 @@ class Worker
           end
         else
           puts "ERROR FROM SERVER (in getting a job): #{job['message']}"
-          @done = true
-          didSomething = true
+          #@done = true
+          #didSomething = true
         end
       rescue Exception => e
         puts "NASTY ERROR: #{e}"
@@ -452,6 +452,7 @@ class Worker
   end
 
   def success(response)
+    return false unless response
     puts "server.response: success = #{response['success']}, message = #{response['message']}" if @verbose >= 1
     response['success'] == true
   end

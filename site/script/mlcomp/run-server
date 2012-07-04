@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Restart the server every night at 4pm.
+# Restart the server every night at 4am.
 while true
   lastRestartTime = Time.now
   puts "=== STARTING SERVER"

@@ -357,7 +357,7 @@ class Run < ActiveRecord::Base
     self.status.status = success ? 'done' : 'failed'
     self.status.save
     log "Status: #{self.status.status}"
-    Notification::notify_event(:message => "Run #{self.id}:#{self.name} of #{self.user && self.user.username} finished: #{self.status.status}")
+    #Notification::notify_event(:message => "Run #{self.id}:#{self.name} of #{self.user && self.user.username} finished: #{self.status.status}")
   end
 
   # return at most maxLines lines of the log file

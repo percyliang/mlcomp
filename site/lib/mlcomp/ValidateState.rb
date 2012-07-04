@@ -35,7 +35,7 @@ class ValidateState
       model.find(:all).each { |x|
         x.user or puts "ERROR: #{str(x)} has no user"
         x.proper or puts "ERROR: #{str(x)} is not proper"
-        x.process_status == "success" or puts "ERROR: #{str(x)} process_status is #{x.process_status}"
+        (x.process_status == "success" || x.process_status == "failed") or puts "ERROR: #{str(x)} process_status is #{x.process_status}"
         File.exists?(x.path) or puts "ERROR: #{str(x)} has non-existent path"
         if File.exists?(x.path+"/metadata")
           name = YAML::load(File.read(x.path+"/metadata"))['name']

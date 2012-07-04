@@ -129,6 +129,8 @@ class Program < ActiveRecord::Base
       self.task_type = map['task'] if map['task']
       self.restricted_access = map['restricted_access'] if map['restricted_access']
       self.constructor_signature = map['construct'] if map['construct']
+      self.tunable = map['tunable'] if map['tunable']
+      self.language = map['language'] if map['language']
     rescue Exception
       raise ProgramException.new("Problem with metadata file: #{$!.message}")
     end
@@ -140,6 +142,8 @@ class Program < ActiveRecord::Base
     map['task'] = self.task_type
     map['restricted_access'] = self.restricted_access
     map['construct'] = self.constructor_signature
+    map['tunable'] = self.tunable
+    map['language'] = self.language
     begin
       f = open("#{path}/metadata", "w")
       f.puts YAML::dump(map)

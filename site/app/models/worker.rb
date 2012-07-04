@@ -21,7 +21,7 @@ class Worker < ActiveRecord::Base
   validates_presence_of   :handle
   validates_uniqueness_of :handle
 
-  WorkerTimeout = 5*60 # 5 minutes
+  WorkerTimeout = 30 * 60 # 30 minutes
 
   # This is screwed up
   def self.countActive; self.count(:conditions => ["updated_at >= now() - #{WorkerTimeout}"]) end
