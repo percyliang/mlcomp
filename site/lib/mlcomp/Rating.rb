@@ -87,12 +87,12 @@ class RatingEngine
     lines = []
     lines << row.call(['domain', 'programID', 'programName', 'datasetID', 'datasetName', 'runID', 'tunedHyperparameters', 'error'])
     Run.find(:all).each_with_index { |r,i|
-      s = r.status.status
       program = r.info.coreProgram
       dataset = r.info.coreDataset
       next if (not program) || program.is_helper
       lines << row.call([dataset.format, program.id, program.name, dataset.id, dataset.name, r.id, r.tuneHyperparameters ? true : false, s == 'done' ? r.error : 'failed'])
 
+      s = r.status.status
       if s == 'done' && r.error
         add.call(program, dataset, r.error)
       elsif s == 'failed'

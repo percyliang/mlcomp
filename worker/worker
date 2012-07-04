@@ -364,29 +364,20 @@ class Worker
     setField(result, 'id', id)
     setField(result, 'exitCode', exitCode)
 
-    if getField(job, 'returnContents') # Expensive, but necessary for data processing runs!
-      #fullZipPath = File.expand_path(@zipPath) # Get full path
-      #puts "Zipping..."
-      #changePath(@scratchPath) {
-      #  systemOrFail('zip', '-q', '-r', fullZipPath, '.')
-      #}
-      #puts "Finished creating zip file"
-      #setBase64Field(result, 'contents', File.read(@zipPath))
-      #puts "Sending a #{Format.space(File.size(@zipPath))} zip file to server..."
-      setField(result, 'contentsHost', @hostname)
-      setField(result, 'contentsLocation', @scratchPath)
-    else
-      # Just send back the key files (program status and console output log)
-      statusPath = "#{@scratchPath}/status"
-      if File.exists?(statusPath)
-        setBase64Field(result, 'status', File.read(statusPath, @maxFileSize))
-      end
-
-      logPath = "#{@scratchPath}/log"
-      if File.exists?(logPath)
-        setBase64Field(result, 'log', File.read(logPath, @maxFileSize))
-      end
+    # Send back important files (program status and console output log)
+    statusPath = "#{@scratchPath}/status"
+    if File.exists?(statusPath)
+      setBase64Field(result, 'status', File.read(statusPath, @maxFileSize))
     end
+
+    logPath = "#{@scratchPath}/log"
+    if File.exists?(logPath)
+      setBase64Field(result, 'log', File.read(logPath, @maxFileSize))
+    end
+
+    # Provide access to all files
+    setField(result, 'contentsHost', @hostname)
+    setField(result, 'contentsLocation', @scratchPath)
 
     response = call("SetJobResult", @workerHandle, result)
     if success(response)
@@ -435,8 +426,6 @@ class Worker
           end
         else
           puts "ERROR FROM SERVER (in getting a job): #{job['message']}"
-          #@done = true
-          #didSomething = true
         end
       rescue Exception => e
         puts "NASTY ERROR: #{e}"

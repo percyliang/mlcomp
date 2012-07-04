@@ -178,15 +178,15 @@ class RunMaster
     log "getJob: #{workerHandle} #{opts.inspect}" if @verbose >= 1
     worker = Worker.findByHandle(workerHandle)
     if worker.current_run
-      Notification::notify_error(:message => "Worker #{worker.handle} not done with run #{worker.current_run.id} but is asking for new one, assuming gave up")
+      Notification::notify_error(:message => "Worker #{worker.handle} not done with run #{worker.current_run.id} but is asking for new one, assume gave up on old one")
       ensureNoRun(worker)
-      return failedResponse("You haven't finished run #{worker.current_run.id}, assuming gave up")
+      return failedResponse("You haven't finished run #{worker.current_run.id}, assume gave up")
     end
 
     # See if we have a run to execute
     run = getRun(worker)
     if run # Yes
-      log "Creating new job for run #{run.id}"
+      log "Creating job for run #{run.id}"
       command = nil
       begin
         command = run.startRun
@@ -212,9 +212,6 @@ class RunMaster
         setIntField(job, 'allowedMemory', run.allowed_memory) if run.allowed_memory
         setIntField(job, 'allowedDisk', run.allowed_disk) if run.allowed_disk
         setField(job, 'command', command)
-        #log "  zipping up #{run.path}..."
-        #setBase64Field(job, 'contents', zipDirContents(run.path))
-        setField(job, 'returnContents', run.processed_dataset != nil) # Return contents if data-processing run
 
         worker.current_run = run
         worker.save!
@@ -326,29 +323,6 @@ class RunMaster
 
     exitCode = getField(result, 'exitCode')
 
-    # Get contents from zip file
-    #if result['contents'] # This is typically too big, so only set for data processing runs (deprecated)
-      #log "Installing contents of results..."
-      #contents = getBase64Field(result, 'contents')
-      #zipPath = MyFileUtils.getTmpPath(".zip")
-      #out = open(zipPath, "w")
-      #out.write(contents)
-      #out.close
-      #contentsPath = MyFileUtils.getTmpPath("")
-      #Dir.mkdir(contentsPath)
-      #systemOrFail('unzip', '-q', zipPath, '-d', contentsPath)
-      #File.unlink(zipPath)
-      #systemOrFail('rm', '-rf', run.path) # Delete old run directory
-      #File.rename(contentsPath, run.path) # Replace with new one
-    #end
-    if result['contentsHost'] && result['contentsLocation']
-      tmpPath = MyFileUtils.getTmpPath("")
-      log "Installing contents of results... (-> #{tmpPath} -> #{run.path})"
-      if copyContents(result, tmpPath, 1)
-        systemOrFail('rm', '-rf', run.path) # Delete old run directory
-        File.rename(tmpPath, run.path) # Replace with new one
-      end
-    end
     if result['status']
       log "Installing status file..."
       status = getBase64Field(result, 'status')
@@ -364,7 +338,16 @@ class RunMaster
       out.close
     end
 
-    run.finishRun(exitCode) # Update database with the run status
+    # Get contents from zip file if necessary
+    tmpPath = nil
+    if run.needFullResults
+      tmpPath = MyFileUtils.getTmpPath("")
+      log "Fetching full results from worker, copying to #{tmpPath}"
+      copyContents(result, tmpPath, 1)
+    end
+
+    run.finishRun(exitCode, tmpPath) # Update database with the run status
+    systemOrFail('rm', '-rf', tmpPath) if tmpPath
 
     worker.current_run = nil
     worker.save!

@@ -33,7 +33,7 @@
 			      <%= Dataset.count %> datasets,
 			      <%= Program.count %> programs,
 			      <%= Run.count %> runs (<%= Run.countByStatus('ready') %> queued, <%= Run.countByStatus('running') %> running),
-			      <%= Worker.countActive %> workers
+			      <%= Worker.count %> workers
 			    </span>
 			</h1>
 			

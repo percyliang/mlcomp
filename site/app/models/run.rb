@@ -250,7 +250,10 @@ class Run < ActiveRecord::Base
     spec.nodes.each { |node_id,node,children|
       case node
         when Program, Dataset
-          raise "Internal error: directory doesn't exist: #{node.path}" unless File.exists?(node.path)
+          unless File.exists?(node.path)
+            log "Internal error: directory doesn't exist: #{node.path}"
+            raise "Internal error: directory doesn't exist: #{node.path}"
+          end
           systemOrFail('ln', '-s', node.path, self.path+"/"+dirs[node_id])
       end
     }
@@ -309,7 +312,10 @@ class Run < ActiveRecord::Base
     "bash "+scriptName
   end
 
-  def finishRun(exitCode)
+  # Whether we need to fetch the full results
+  def needFullResults; self.processed_dataset != nil end
+
+  def finishRun(exitCode, fullResultsPath=nil)
     log "===== FINISH RUN #{id} ====="
 
     dirs = getDirs
@@ -329,7 +335,7 @@ class Run < ActiveRecord::Base
     # If I'm a dataset processing run, then mark dataset as processed (either success or failed).
     # Also copy the dataset back.
     if self.processed_dataset
-      sourcePath = self.path+"/"+dirs[1]
+      sourcePath = fullResultsPath+"/"+dirs[1]
       if success && File.directory?(sourcePath) # Copy it over
         self.processed_dataset.deleteFromFilesystem
         log "Installing processed dataset (#{sourcePath} -> #{self.processed_dataset.path})..."
