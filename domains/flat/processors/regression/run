@@ -1,16 +1,94 @@
-#!/usr/bin/ruby
+#!/usr/bin/python
 
-require 'svmlight-format'
+import os, sys, yaml, random
 
-class RegressionFormat < SVMLightFormat
-  def isValidLabel(y); y.to_f_or_nil != nil end
+def writeStatus(summary):
+  f = open("status", "w")
+  f.write(yaml.dump(summary, default_flow_style=False))
+  f.close()
 
-  def updateLabelSummary(summary, y)
-    y = y.to_f_or_nil
-    summary = {'minLabelValue' => Float::MAX, 'maxLabelValue' => Float::MIN} if not summary
-    summary['minLabelValue'] = [summary['minLabelValue'], y].min
-    summary['maxLabelValue'] = [summary['maxLabelValue'], y].max
-    summary
-  end
-end
-RegressionFormat.new.main
+def inspect(path):
+  numExamples = 0
+  numDim = 0
+  summary = {}
+  lineNum = 0
+
+  numFeatures = 0
+  sumFeatureValue = 0
+  minFeatureValue = None
+  maxFeatureValue = None
+
+  for line in open(path):
+    lineNum += 1
+    line = line.lstrip().rstrip()
+    if line.startswith("#"): continue
+    tokens = line.split()
+    y = tokens[0]
+    xs = tokens[1:]
+    if lineNum % 10000 == 0: print "  Example", lineNum
+
+    # Label
+    y = float(y)
+    summary['minLabelValue'] = min(summary['minLabelValue'], y) if 'minLabelValue' in summary else y
+    summary['maxLabelValue'] = max(summary['maxLabelValue'], y) if 'maxLabelValue' in summary else y
+
+    # Features
+    for x in xs:
+      i, v = x.split(":")
+      i = int(i)
+      v = float(v)
+      assert i >= 1, "Invalid feature on line %s (must be 1, 2, ...): %s" % (lineNum, i)
+      numDim = max(numDim, i)
+      numFeatures += 1
+      sumFeatureValue += v
+      minFeatureValue = min(minFeatureValue, v) if minFeatureValue else v
+      maxFeatureValue = max(maxFeatureValue, v) if maxFeatureValue else v
+    numExamples += 1
+
+  # Return statistics
+  summary['numExamples'] = numExamples
+  summary['numDim'] = numDim # For backward compatability
+  summary['numFeatures'] = numDim
+  if numExamples > 0:
+    summary['numActiveFeaturesPerExample'] = numFeatures / numExamples
+    summary['minActiveFeatureValue'] = minFeatureValue
+    summary['maxActiveFeatureValue'] = maxFeatureValue
+    summary['meanActiveFeatureValue'] = sumFeatureValue / numFeatures
+  writeStatus(summary)
+
+def split(rawPath, trainPath, testPath):
+  random.seed(1)
+  trainSplitFrac = 0.7
+  lines = open(rawPath).readlines()
+  n = len(lines)
+  perm = range(n)
+  for i in xrange(n):
+    j = random.randint(i, n-1)
+    perm[i], perm[j] = perm[j], perm[i]
+  numTrainExamples = int(n * trainSplitFrac + 0.5)
+
+  f = open(trainPath, "w")
+  for i in perm[0:numTrainExamples]: f.write(lines[i])
+  f.close()
+
+  f = open(testPath, "w")
+  for i in perm[numTrainExamples:]: f.write(lines[i])
+  f.close()
+
+def stripLabels(inPath, outPath):
+  f = open(outPath, "w")
+  for line in open(inPath):
+    line = line.lstrip().rstrip()
+    if line.startswith("#"): continue
+    tokens = line.split()
+    tokens[0] = "1" # Overwrite label
+    print >>f, " ".join(tokens)
+  f.close()
+
+cmd = sys.argv[1]
+if cmd == "inspect":
+  inspect(sys.argv[2])
+elif cmd == "split":
+  split(sys.argv[2], sys.argv[3], sys.argv[4])
+elif cmd == "stripLabels":
+  stripLabels(sys.argv[2], sys.argv[3])
