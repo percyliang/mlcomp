@@ -90,9 +90,10 @@ class RatingEngine
       program = r.info.coreProgram
       dataset = r.info.coreDataset
       next if (not program) || program.is_helper
+      s = r.status.status
+
       lines << row.call([dataset.format, program.id, program.name, dataset.id, dataset.name, r.id, r.tuneHyperparameters ? true : false, s == 'done' ? r.error : 'failed'])
 
-      s = r.status.status
       if s == 'done' && r.error
         add.call(program, dataset, r.error)
       elsif s == 'failed'
