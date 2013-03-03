@@ -149,6 +149,7 @@ class EC2Manager
 
       # Create a worker
       log "checkIfShouldStart: Starting instance #{instance_id}"
+      sleep 5
       
       # Wait until the worker is ready
       host = nil
@@ -167,7 +168,9 @@ class EC2Manager
           end
         }
         if not found
-          raise "Launched #{instance_id}, but doesn't show up in ec2-describe-instances"
+          Notification.notify_error(:message => "Launched #{instance_id}, but doesn't show up in ec2-describe-instances, trying to terminate now")
+          systemAndLog("ec2-terminate-instances #{instance_id}")
+          return
         end
       end
       log "checkIfShouldStart: Instance #{instance_id} is ready on #{host}"
