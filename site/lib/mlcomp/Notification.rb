@@ -71,7 +71,7 @@ module Notification
       begin
         Emailer.deliver_general_email(options[:subject], options[:message])
       rescue Exception => e
-        log "ERROR SENDING EMAIL!"
+        log "ERROR SENDING EMAIL: #{e}!"
       end
     end
   end
