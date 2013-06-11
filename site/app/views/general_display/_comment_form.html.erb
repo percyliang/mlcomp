@@ -13,7 +13,7 @@
 	) do %>
   	<%= hidden_field_tag "commenturl", request.request_uri.to_s %>
 	<div class="sidebar_header">Comments/Bugs:</div>
-	<%= text_area_tag 'comment', "Find any bugs? Have suggestions? Leave feedback here...", :rows => 4, :cols => 27 %><p>
+	<%= text_area_tag 'comment', "", :rows => 4, :cols => 27 %><p>
 
 		<span class="buttons"><%= link_to_remote "Send", :url => {
 				:action => "leave_comment", 

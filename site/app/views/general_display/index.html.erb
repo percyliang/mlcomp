@@ -35,9 +35,6 @@
   </table>
 
   <%= link_to 'Sign up', :controller => 'users', :action => 'new' %> for a free account!<p>
-  
-  <a href="http://spreadsheets0.google.com/viewform?authkey=CN_n4ZkN&formkey=dG9nSGMwRGV4NHNIWWpWbzRGWjNNZ2c6MQ#gid=0" target="_blank">Vote</a>
-  on new features you'd like in MLcomp.
 </div>
 
 <br>
@@ -45,10 +42,6 @@
 <div style="clear:both">
 	
 </div>
-
-<hr>
-<h4>MLcomp snapshot</h4>
-<br>
 
 <div class="panel">
   <%= render :partial => 'table/many_table_show', :locals => { :tparams => @program_tparams } %>
@@ -60,6 +53,4 @@
 
 <% content_for :sidebar do %>
 <%= render :partial => 'general_display/dataset_format_selector' %>
-<br>
-<%= render :partial => 'shared/twitter_news' %>
 <% end %>
