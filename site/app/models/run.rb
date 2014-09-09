@@ -385,6 +385,10 @@ class Run < ActiveRecord::Base
      Run.count(:joins => :status, :conditions => ["run_statuses.status = (?)", status])
   end
 
+  def self.runningRuns
+     Run.find(:all, :joins => :status, :conditions => ["run_statuses.status = (?)", 'running'])
+  end
+
   def running?; self.status.status == 'running' && self.worker end
 
   def restricted_access(user); (self.programs + self.datasets).find {|p| p.restricted_access && p.user != user} end
